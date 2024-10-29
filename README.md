@@ -1,7 +1,7 @@
 # BBAM-BIL372 / MUSIC STREAMING MANAGEMENT SYSTEM
 
-Github Page : https://github.com/bunveren/BBAM-BIL372
 Group Name : BBAM
+
 Group Members: 
 Betül Sağlam - 221101041
 Beren Ünveren - 221101006
