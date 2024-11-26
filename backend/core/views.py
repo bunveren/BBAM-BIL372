@@ -160,3 +160,159 @@ def track_detail(request, pk):
         track.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.core.exceptions import ValidationError
+import json
+
+from .models import Users, User_Follow_Interactions, Artists, Albums, Tracks, Playlists, User_Interactions, Recently_Listened
+from .serializers import UsersSerializer, UserFollowInteractionsSerializer, ArtistsSerializer, AlbumsSerializer, TracksSerializer, PlaylistsSerializer, UserInteractionsSerializer, RecentlyListenedSerializer
+
+# Albums
+
+@api_view(['GET', 'POST']) # /api/albums
+def all_albums(request):
+    if request.method == 'GET':
+        albums = Albums.objects.all()
+        serializer = AlbumsSerializer(albums, many=True)
+        return Response(serializer.data, status=200)
+    
+    elif request.method == 'POST':
+        serializer = AlbumsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+@api_view(['GET', 'PUT', 'DELETE']) # /api/albums/{album_id}
+def album_detail(request, pk):
+    try:
+        album = Albums.objects.get(pk=pk)
+    except Albums.DoesNotExist:
+        return Response({"error": "Album not found"}, status=404)
+
+    if request.method == 'GET':
+        serializer = AlbumsSerializer(album)
+        return Response(serializer.data, status=200)
+
+    elif request.method == 'PUT':
+        serializer = AlbumsSerializer(album, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=200)
+        return Response(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        album.delete()
+        return Response({"message": "Album deleted successfully"}, status=204)
+    
+@api_view(['GET']) # /api/albums/artists/{artist_id}
+def artist_albums(request, artist_id):
+    try:
+        albums = Albums.objects.filter(Artist_ID=artist_id)
+        if not albums.exists():
+            return Response({"error": "No albums found for this artist"}, status=404)
+        serializer = AlbumsSerializer(albums, many=True)
+        return Response(serializer.data, status=200)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500) 
+
+
+# Playlists
+
+@api_view(['GET', 'POST']) # /api/playlists/users/{user_id}
+def all_user_playlists(request, user_id):
+    if request.method == 'GET':
+        playlists = Playlists.objects.filter(User_ID=user_id)
+        if playlists.exists():
+            serializer = PlaylistsSerializer(playlists, many=True)
+            return Response(serializer.data, status=200)
+        return Response({"error": "No playlists found for this user"}, status=status.HTTP_404_NOT_FOUND)
+    
+    elif request.method == 'POST':
+        data = request.data
+        data['User_ID'] = user_id
+        serializer = PlaylistsSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+@api_view(['GET', 'PUT', 'DELETE']) # /api/playlists/users/{user_id}/{playlist_id}
+def playlist_detail(request, user_id, playlist_id):
+    try:
+        playlist = Playlists.objects.get(User_ID=user_id, Playlist_ID=playlist_id)
+    except Playlists.DoesNotExist:
+        return Response({"error": "Playlist not found"}, status=404)
+
+    if request.method == 'GET':
+        serializer = PlaylistsSerializer(playlist)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        serializer = PlaylistsSerializer(playlist, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        playlist.delete()
+        return Response({"message": "Playlist deleted successfully"}, status=204)
+    
+
+# User_Interactions
+
+@api_view(['GET', 'POST', 'DELETE']) # api/user_interactions/{user_id}/{track_id}
+def user_interaction(request, user_id, track_id):
+    try:
+        interaction = User_Interactions.objects.get(User_ID=user_id, Track_ID=track_id)
+    except User_Interactions.DoesNotExist:
+        return Response({"error": "Interaction not found"}, status=404)
+
+    if request.method == 'GET':
+        # Retrieve the interaction
+        serializer = UserInteractionsSerializer(interaction)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        # Update the interaction
+        serializer = UserInteractionsSerializer(interaction, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        # Delete the interaction
+        interaction.delete()
+        return Response({"message": "Interaction deleted successfully"}, status=204)
+    
+# Recently_Listened
+
+@api_view(['GET', 'POST', 'DELETE'])  # /api/recently_listened/{user_id}/{track_id}
+def recently_listened(request, user_id, track_id):
+    try:
+        recently_listened_entry = Recently_Listened.objects.get(User_ID=user_id, Track_ID=track_id)
+    except Recently_Listened.DoesNotExist:
+        return Response({"error": "Recently listened entry not found"}, status=404)
+
+    if request.method == 'GET':
+        # Retrieve the recently listened entry
+        serializer = RecentlyListenedSerializer(recently_listened_entry)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        # Update or add the recently listened entry (e.g., play count or timestamp)
+        serializer = RecentlyListenedSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        # Delete the recently listened entry
+        recently_listened_entry.delete()
+        return Response({"message": "Recently listened entry deleted successfully"}, status=204)
+    
