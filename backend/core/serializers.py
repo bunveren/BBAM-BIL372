@@ -4,12 +4,6 @@ from .models import (
     Users, User_Follow_Interactions, Artists, Tracks
 )
 
-class AlbumsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Albums
-        fields = '__all__'
-
-
 class PlaylistsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlists
@@ -50,3 +44,11 @@ class TracksSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tracks
         fields = '__all__'
+
+class AlbumsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Albums
+        fields = '__all__'
+
+        artist = ArtistsSerializer(source='Artist_ID',
+            read_only=True)  # Use the ForeignKey 'Artist_ID' to retrieve artist data

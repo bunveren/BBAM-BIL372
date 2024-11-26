@@ -16,7 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from backend.core import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('users/', views.users_list, name='users_list'),
+    path('users/<int:pk>/', views.user_detail, name='user_detail'),
+
+    path('user-follow/', views.user_follow_list, name='user_follow_list'),
+    path('user-follow/<int:pk>/', views.user_follow_detail, name='user_follow_detail'),
+
+    path('artists/', views.artists_list, name='artists_list'),
+    path('artists/<int:pk>/', views.artist_detail, name='artist_detail'),
+
+    path('tracks/', views.tracks_list, name='tracks_list'),
+    path('tracks/<int:pk>/', views.track_detail, name='track_detail'),
 ]
