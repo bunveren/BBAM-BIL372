@@ -1,16 +1,16 @@
 # import backend.core.views
-
-#todo add play-pause buttons for visual
-#todo make the other users' and artists' pages accessible
-#todo make search tab useful????
+# todo add play-pause buttons for visual
+# todo make the other users' and artists' pages accessible
+# todo make search tab useful????
 
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLabel, QWidget, QListWidget, QStackedWidget, QTableWidget, QTableWidgetItem,
-    QSplitter, QSizePolicy
+   QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton,
+   QLabel, QWidget, QListWidget, QStackedWidget,
+   QSplitter
 )
-from PyQt5.QtGui import QFont, QIcon
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QFont, QIcon, QPixmap
+from PyQt5.QtCore import Qt, QSize, QPropertyAnimation
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -18,6 +18,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("spotify çakması ui")
         self.setGeometry(100, 100, 1024, 768)
         self.font = QFont("Arial", 12, QFont.Normal)
+
+        self.animation = QPropertyAnimation(self, b"windowOpacity")
+        self.animation.setDuration(500)
+        self.animation.setStartValue(0)
+        self.animation.setEndValue(1)
+        self.animation.start()
 
         self.setStyleSheet("""
             QWidget {
@@ -73,19 +79,19 @@ class MainWindow(QMainWindow):
                 background: #181818;
             }
             QSplitter::handle {
-                background-color: #444444;  
-                border: 1px solid #282828;  
-                width: 6px;  
+                background-color: #444444; 
+                border: 1px solid #282828; 
+                width: 6px; 
             }
             QSplitter::handle:pressed {
-                background-color: #666666;  
+                background-color: #666666; 
             }
         """)
 
         self.main_splitter = QSplitter(Qt.Horizontal)
 
         menu_layout = QVBoxLayout()
-        self.profile_button = QPushButton("Profil")
+        self.profile_button = QPushButton("Ana Sayfa")
         self.playlist_button = QPushButton("Playlist'lerim")
         self.artist_button = QPushButton("Sanatçılarım")
         self.search_button = QPushButton("Arama")
@@ -107,7 +113,7 @@ class MainWindow(QMainWindow):
         self.playlist_button.setIconSize(QSize(24, 24))
         self.artist_button.setIconSize(QSize(24, 24))
         self.search_button.setIconSize(QSize(24, 24))
-        self.settings_button.setIconSize(QSize(24,24))
+        self.settings_button.setIconSize(QSize(24, 24))
 
         menu_layout.addWidget(self.profile_button)
         menu_layout.addWidget(self.playlist_button)
@@ -121,7 +127,7 @@ class MainWindow(QMainWindow):
 
         self.stack = QStackedWidget()
 
-        self.profile_screen = self.create_profile_screen()
+        self.profile_screen = self.start_screen()
 
         playlists_data = {
             "Liste 1": ["Şarkı A", "Şarkı B", "Şarkı C"],
@@ -192,28 +198,75 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         return container
 
-    def create_profile_screen(self):
+    def show_recent_screen(self):
         layout = QVBoxLayout()
-        username_label = QLabel("Kullanıcı Adı: example_user")
-        username_label.setFont(QFont("Arial", 14))
-        username_label.setAlignment(Qt.AlignCenter)
 
-        followers_button = QPushButton("Takipçiler (50)")
-        following_button = QPushButton("Takip Edilenler (30)")
+        new_screen_label = QLabel("Yakın zamanda dinlenenler burada görünecek.")
+        new_screen_label.setAlignment(Qt.AlignCenter)
+        new_screen_label.setFont(QFont("Arial", 18))
+
+        back_button = QPushButton("Ana Sayfa")
+        back_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
+
+        layout.addWidget(new_screen_label)
+        layout.addWidget(back_button)
+
+        continue_container = QWidget()
+        continue_container.setLayout(layout)
+
+        self.stack.addWidget(continue_container)
+        self.stack.setCurrentWidget(continue_container)
+
+    def start_screen(self):
+        username = "Seda"
+        username_label = QLabel(f"Tekrar hoş geldin {username}!")
+        username_label.setStyleSheet("font-family: Arial; font-size: 35px; font-weight: bold;")
+
+        profile_picture = QLabel()
+        pixmap = QPixmap("resources/thispersondoesnotexist.jpg")
+        profile_picture.setPixmap(pixmap.scaled(100, 100))
+
+        followers = 5
+        followed_by = 2
+        followers_button = QPushButton(f"Takipçiler ({followers})")
+        following_button = QPushButton(f"Takip Edilenler ({followed_by})")
         followers_button.setIcon(QIcon("resources/follower-svgrepo-com.svg"))
         following_button.setIcon(QIcon("resources/following-svgrepo-com.svg"))
+        followers_button.setFixedSize(170, 40)
+        following_button.setFixedSize(170, 40)
         followers_button.setStyleSheet("text-align: left;")
         following_button.setStyleSheet("text-align: left;")
 
         followers_button.clicked.connect(lambda: self.show_list_screen("Takipçiler", ["User1", "User2", "User3"]))
         following_button.clicked.connect(lambda: self.show_list_screen("Takip Edilenler", ["UserA", "UserB", "UserC"]))
 
-        layout.addWidget(username_label)
-        layout.addWidget(followers_button)
-        layout.addWidget(following_button)
+        profile_layout = QHBoxLayout()
+        profile_layout.addWidget(profile_picture)
+        profile_layout.addWidget(followers_button)
+        profile_layout.addWidget(following_button)
+        profile_layout.addStretch()
+        profile_layout.setSpacing(10)
+
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(username_label)
+        main_layout.addLayout(profile_layout)
+        main_layout.addStretch()
+
+        continue_label = QLabel("Kaldığın yerden devam et...")
+        continue_label.setStyleSheet("font-size: 18px; color: gray; text-align: center;")
+        continue_button = QPushButton("Devam Et")
+        continue_button.setFixedSize(170, 40)
+        continue_button.clicked.connect(lambda: self.show_recent_screen())
+
+        continue_layout = QHBoxLayout()
+        continue_layout.addWidget(continue_label)
+        continue_layout.addWidget(continue_button)
+        continue_layout.setSpacing(10)
+
+        main_layout.addLayout(continue_layout)
 
         container = QWidget()
-        container.setLayout(layout)
+        container.setLayout(main_layout)
         return container
 
     def create_artist_screen(self, artist_data):
@@ -300,6 +353,7 @@ class MainWindow(QMainWindow):
 
     def load_followed_by(self, item):
         return
+
 
 if __name__ == "__main__":
     app = QApplication([])
