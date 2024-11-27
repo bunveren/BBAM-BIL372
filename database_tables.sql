@@ -1,0 +1,67 @@
+CREATE TABLE Users (
+    User_ID SERIAL PRIMARY KEY,
+    Username VARCHAR(50) NOT NULL UNIQUE,
+    Password VARCHAR(50) NOT NULL,
+    Email VARCHAR(50) NOT NULL UNIQUE,
+    Subscription_type ENUM('Free', 'Premium') NOT NULL,
+    Created_at DATE DEFAULT '2024-11-27'
+);
+CREATE TABLE Recently_Listened (
+    Recently_Listened_ID SERIAL PRIMARY KEY,
+    User_ID BIGINT UNSIGNED NOT NULL,
+    Track_ID BIGINT UNSIGNED NOT NULL,
+    Timestamp DATE,
+    Play_count INT DEFAULT 0,
+    FOREIGN KEY (User_ID) REFERENCES Users(User_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Track_ID) REFERENCES Tracks(Track_ID) ON DELETE CASCADE
+);
+CREATE TABLE User_Follow_Interactions (
+    Following JSON NOT NULL,
+    Followed_By JSON NOT NULL,
+    User_ID BIGINT UNSIGNED NOT NULL,
+    FOREIGN KEY (User_ID) REFERENCES Users(User_ID) ON DELETE CASCADE
+);
+CREATE TABLE Artists (
+    Artist_ID SERIAL PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Biography TEXT,
+    Genre VARCHAR(50),
+    Songs JSON
+);
+CREATE TABLE Albums (
+    Album_ID SERIAL PRIMARY KEY,
+    Title VARCHAR(100) NOT NULL,
+    Release_date DATE NOT NULL,
+    Artist_ID BIGINT UNSIGNED NOT NULL,
+    FOREIGN KEY (Artist_ID) REFERENCES Artists(Artist_ID) ON DELETE CASCADE
+);
+CREATE TABLE Tracks (
+    Track_ID SERIAL PRIMARY KEY,
+    Title VARCHAR(100) NOT NULL,
+    Duration INT NOT NULL,
+    Album_ID BIGINT UNSIGNED NOT NULL,
+    Genre VARCHAR(50),
+    File_Path VARCHAR(255) NOT NULL,
+    Artists_ID JSON NOT NULL,
+    Play_count INT DEFAULT 0,
+    FOREIGN KEY (Album_ID) REFERENCES Albums(Album_ID) ON DELETE CASCADE
+);
+CREATE TABLE Playlists (
+    Playlist_ID SERIAL PRIMARY KEY,
+    User_ID BIGINT UNSIGNED NOT NULL,
+    Name VARCHAR(100) NOT NULL,
+    Created_at DATE,
+    Tracks JSON,
+    FOREIGN KEY (User_ID) REFERENCES Users(User_ID) ON DELETE CASCADE
+);
+CREATE TABLE User_Interactions (
+    Interaction_ID SERIAL PRIMARY KEY,
+    User_ID BIGINT UNSIGNED NOT NULL,
+    Track_ID BIGINT UNSIGNED NOT NULL,
+    Liked BOOLEAN DEFAULT FALSE,
+    Timestamp INT DEFAULT 0,
+    FOREIGN KEY (User_ID) REFERENCES Users(User_ID) ON DELETE CASCADE,
+    FOREIGN KEY (Track_ID) REFERENCES Tracks(Track_ID) ON DELETE CASCADE
+);
+
+
