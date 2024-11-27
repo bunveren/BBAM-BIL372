@@ -3,7 +3,6 @@
 #todo add play-pause buttons for visual
 #todo make the other users' and artists' pages accessible
 #todo make search tab useful????
-#todo settings
 
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton,
@@ -123,8 +122,24 @@ class MainWindow(QMainWindow):
         self.stack = QStackedWidget()
 
         self.profile_screen = self.create_profile_screen()
-        self.playlist_screen = self.create_playlist_screen()
-        self.artist_screen = self.create_artist_screen()
+
+        playlists_data = {
+            "Liste 1": ["Şarkı A", "Şarkı B", "Şarkı C"],
+            "Liste 2": ["Şarkı D", "Şarkı E", "Şarkı F"],
+            "Liste 3": ["Şarkı G", "Şarkı H", "Şarkı I"],
+            "Liste 4": ["Şarkı J", "Şarkı K", "Şarkı L"],
+        }
+
+        self.playlist_screen = self.create_playlists_screen(playlists_data)
+
+        artists_data = {
+            "Sanatçı 1": ["Şarkı A", "Şarkı B", "Şarkı C"],
+            "Sanatçı 2": ["Şarkı D", "Şarkı E", "Şarkı F"],
+            "Sanatçı 3": ["Şarkı G", "Şarkı H", "Şarkı I"],
+            "Sanatçı 4": ["Şarkı J", "Şarkı K", "Şarkı L"],
+        }
+
+        self.artist_screen = self.create_artist_screen(artists_data)
         self.search_screen = self.create_search_screen()
         self.settings_screen = self.create_settings_screen()
 
@@ -152,22 +167,27 @@ class MainWindow(QMainWindow):
         self.search_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.search_screen))
         self.settings_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.settings_screen))
 
-#todo setting screen
     def create_settings_screen(self):
         layout = QVBoxLayout()
+
         arb_button1 = QPushButton("a")
         arb_button2 = QPushButton("b")
         arb_button1.setIcon(QIcon("resources/mix-svgrepo-com.svg"))
         arb_button2.setIcon(QIcon("resources/musician-svgrepo-com.svg"))
 
-        arb_button1.setStyleSheet("text-align: left;")
-        arb_button2.setStyleSheet("text-align: left;")
+        arb_button1.setStyleSheet("text-align: left; width: 100%;")
+        arb_button2.setStyleSheet("text-align: left; width: 100%;")
 
         arb_button1.clicked.connect(lambda: self.show_list_screen("ayar1", ["a", "b", "c"]))
         arb_button2.clicked.connect(lambda: self.show_list_screen("ayar2", ["d", "e", "f"]))
 
         layout.addWidget(arb_button1)
         layout.addWidget(arb_button2)
+        layout.addStretch()
+        home_button = QPushButton("Ana Sayfa")
+        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
+        layout.addWidget(home_button)
+
         container = QWidget()
         container.setLayout(layout)
         return container
@@ -196,85 +216,42 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         return container
 
-    def create_playlist_screen(self):
+    def create_artist_screen(self, artist_data):
         layout = QVBoxLayout()
+        for artist, songs in artist_data.items():
+            button = QPushButton(artist)
+            button.setIcon(QIcon("resources/musician-svgrepo-com.svg"))
+            button.setStyleSheet("text-align: left; width: 100%;")
 
-        self.playlist_list = QListWidget()
-        self.playlist_list.addItems(["Favoriler", "Çalışma Listesi", "Yaz Hiti"])
+            button.clicked.connect(lambda _, a=artist, s=songs: self.show_list_screen(a, s))
+            layout.addWidget(button)
 
-        self.playlist_list.itemClicked.connect(self.load_playlist_songs)
+        layout.addStretch()
 
-        self.song_table = QTableWidget(0, 3)
-        self.song_table.setHorizontalHeaderLabels(["Şarkı Adı", "Sanatçı", "Süre"])
-
-        self.song_table.setStyleSheet("""
-                QTableWidget {
-                    background-color: #181818;  
-                    color: #FFFFFF;  
-                    border: 1px solid #282828;  
-                    selection-background-color: #1DB954;  
-                }
-
-                QTableWidget::item {
-                    border-bottom: 1px solid #282828;  
-                }
-
-                QTableWidget::horizontalHeader {
-                    background-color: #282828;  
-                    color: #B3B3B3;  
-                    font-weight: bold; 
-                }
-
-                QTableWidget::horizontalHeader::section {
-                    border: none;  
-                    padding: 10px;
-                }
-
-                QTableWidget::item:selected {
-                    background-color: #1ed760;  
-                }
-
-                QTableWidget::verticalHeader {
-                    background-color: #181818;  
-                    color: #B3B3B3;  
-                }
-
-                QTableWidget::item:hover {
-                    background-color: #444444; 
-                }
-            """)
-
-        layout.addWidget(self.playlist_list)
-        layout.addWidget(self.song_table)
         home_button = QPushButton("Ana Sayfa")
         home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
         layout.addWidget(home_button)
+
         container = QWidget()
         container.setLayout(layout)
         return container
 
-    def load_playlist_songs(self, item):
-        playlist_songs = {
-            "Favoriler": [["Şarkı 1", "Sanatçı A", "3:30"], ["Şarkı 2", "Sanatçı B", "4:00"]],
-            "Çalışma Listesi": [["Şarkı 3", "Sanatçı C", "2:45"], ["Şarkı 4", "Sanatçı D", "3:50"]],
-            "Yaz Hiti": [["Şarkı 5", "Sanatçı E", "3:15"], ["Şarkı 6", "Sanatçı F", "4:20"]]
-        }
-
-        songs = playlist_songs.get(item.text(), [])
-        self.song_table.setRowCount(len(songs))
-        for row, song in enumerate(songs):
-            for col, value in enumerate(song):
-                self.song_table.setItem(row, col, QTableWidgetItem(value))
-
-    def create_artist_screen(self):
+    def create_playlists_screen(self, playlists_data):
         layout = QVBoxLayout()
-        artist_list = QListWidget()
-        artist_list.addItems(["Sanatçı 1", "Sanatçı 2", "Sanatçı 3", "Sanatçı 4"])
+        for playlist, songs in playlists_data.items():
+            button = QPushButton(playlist)
+            button.setIcon(QIcon("resources/music-player-svgrepo-com.svg"))
+            button.setStyleSheet("text-align: left; width: 100%;")
 
-        layout.addWidget(artist_list)
+            button.clicked.connect(lambda _, a=playlist, s=songs: self.show_list_screen(a, s))
+            layout.addWidget(button)
+
+        layout.addStretch()
+
         home_button = QPushButton("Ana Sayfa")
         home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
         layout.addWidget(home_button)
+
         container = QWidget()
         container.setLayout(layout)
         return container
@@ -314,6 +291,15 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.stack.addWidget(container)
         self.stack.setCurrentWidget(container)
+
+    def load_artists(self, item):
+        return
+
+    def load_followers(self, item):
+        return
+
+    def load_followed_by(self, item):
+        return
 
 if __name__ == "__main__":
     app = QApplication([])
