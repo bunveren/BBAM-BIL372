@@ -1,19 +1,17 @@
 # import backend.core.views
 
 #todo add play-pause buttons for visual
-#todo add icons for tabs
-#todo make everything look more satisfying
 #todo make the other users' and artists' pages accessible
 #todo make search tab useful????
+#todo settings
 
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QWidget, QListWidget, QStackedWidget, QTableWidget, QTableWidgetItem,
-    QSplitter
+    QSplitter, QSizePolicy
 )
 from PyQt5.QtGui import QFont, QIcon
-from PyQt5.QtCore import Qt
-
+from PyQt5.QtCore import Qt, QSize
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -92,11 +90,31 @@ class MainWindow(QMainWindow):
         self.playlist_button = QPushButton("Playlist'lerim")
         self.artist_button = QPushButton("Sanatçılarım")
         self.search_button = QPushButton("Arama")
+        self.settings_button = QPushButton("Ayarlar")
+
+        self.profile_button.setIcon(QIcon("resources/profile-svgrepo-com.svg"))
+        self.playlist_button.setIcon(QIcon("resources/music-player-svgrepo-com.svg"))
+        self.artist_button.setIcon(QIcon("resources/musician.svg"))
+        self.search_button.setIcon(QIcon("resources/search-svgrepo-com.svg"))
+        self.settings_button.setIcon(QIcon("resources/settings-svgrepo-com.svg"))
+
+        self.profile_button.setStyleSheet("text-align: left;")
+        self.playlist_button.setStyleSheet("text-align: left;")
+        self.artist_button.setStyleSheet("text-align: left;")
+        self.search_button.setStyleSheet("text-align: left;")
+        self.settings_button.setStyleSheet("text-align: left;")
+
+        self.profile_button.setIconSize(QSize(24, 24))
+        self.playlist_button.setIconSize(QSize(24, 24))
+        self.artist_button.setIconSize(QSize(24, 24))
+        self.search_button.setIconSize(QSize(24, 24))
+        self.settings_button.setIconSize(QSize(24,24))
 
         menu_layout.addWidget(self.profile_button)
         menu_layout.addWidget(self.playlist_button)
         menu_layout.addWidget(self.artist_button)
         menu_layout.addWidget(self.search_button)
+        menu_layout.addWidget(self.settings_button)
         menu_layout.addStretch()
 
         menu_container = QWidget()
@@ -108,17 +126,19 @@ class MainWindow(QMainWindow):
         self.playlist_screen = self.create_playlist_screen()
         self.artist_screen = self.create_artist_screen()
         self.search_screen = self.create_search_screen()
+        self.settings_screen = self.create_settings_screen()
 
         self.stack.addWidget(self.profile_screen)
         self.stack.addWidget(self.playlist_screen)
         self.stack.addWidget(self.artist_screen)
         self.stack.addWidget(self.search_screen)
+        self.stack.addWidget(self.settings_screen)
 
         self.main_splitter.addWidget(menu_container)
         self.main_splitter.addWidget(self.stack)
 
-        self.main_splitter.setStretchFactor(0, 1)  # Menü
-        self.main_splitter.setStretchFactor(1, 4)  # Görünüm Alanı
+        self.main_splitter.setStretchFactor(0, 1)
+        self.main_splitter.setStretchFactor(1, 4)
 
         container = QWidget()
         layout = QHBoxLayout()
@@ -130,6 +150,27 @@ class MainWindow(QMainWindow):
         self.playlist_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.playlist_screen))
         self.artist_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.artist_screen))
         self.search_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.search_screen))
+        self.settings_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.settings_screen))
+
+#todo setting screen
+    def create_settings_screen(self):
+        layout = QVBoxLayout()
+        arb_button1 = QPushButton("a")
+        arb_button2 = QPushButton("b")
+        arb_button1.setIcon(QIcon("resources/mix-svgrepo-com.svg"))
+        arb_button2.setIcon(QIcon("resources/musician-svgrepo-com.svg"))
+
+        arb_button1.setStyleSheet("text-align: left;")
+        arb_button2.setStyleSheet("text-align: left;")
+
+        arb_button1.clicked.connect(lambda: self.show_list_screen("ayar1", ["a", "b", "c"]))
+        arb_button2.clicked.connect(lambda: self.show_list_screen("ayar2", ["d", "e", "f"]))
+
+        layout.addWidget(arb_button1)
+        layout.addWidget(arb_button2)
+        container = QWidget()
+        container.setLayout(layout)
+        return container
 
     def create_profile_screen(self):
         layout = QVBoxLayout()
@@ -139,6 +180,10 @@ class MainWindow(QMainWindow):
 
         followers_button = QPushButton("Takipçiler (50)")
         following_button = QPushButton("Takip Edilenler (30)")
+        followers_button.setIcon(QIcon("resources/follower-svgrepo-com.svg"))
+        following_button.setIcon(QIcon("resources/following-svgrepo-com.svg"))
+        followers_button.setStyleSheet("text-align: left;")
+        following_button.setStyleSheet("text-align: left;")
 
         followers_button.clicked.connect(lambda: self.show_list_screen("Takipçiler", ["User1", "User2", "User3"]))
         following_button.clicked.connect(lambda: self.show_list_screen("Takip Edilenler", ["UserA", "UserB", "UserC"]))
@@ -201,7 +246,9 @@ class MainWindow(QMainWindow):
 
         layout.addWidget(self.playlist_list)
         layout.addWidget(self.song_table)
-
+        home_button = QPushButton("Ana Sayfa")
+        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
+        layout.addWidget(home_button)
         container = QWidget()
         container.setLayout(layout)
         return container
@@ -225,7 +272,9 @@ class MainWindow(QMainWindow):
         artist_list.addItems(["Sanatçı 1", "Sanatçı 2", "Sanatçı 3", "Sanatçı 4"])
 
         layout.addWidget(artist_list)
-
+        home_button = QPushButton("Ana Sayfa")
+        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
+        layout.addWidget(home_button)
         container = QWidget()
         container.setLayout(layout)
         return container
@@ -237,7 +286,9 @@ class MainWindow(QMainWindow):
         search_label.setAlignment(Qt.AlignCenter)
 
         layout.addWidget(search_label)
-
+        home_button = QPushButton("Ana Sayfa")
+        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
+        layout.addWidget(home_button)
         container = QWidget()
         container.setLayout(layout)
         return container
