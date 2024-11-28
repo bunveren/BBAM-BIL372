@@ -12,6 +12,7 @@ CREATE TABLE Artists (
     Name VARCHAR(100) NOT NULL,
     Biography TEXT,
     Genre VARCHAR(50)
+    
 );
 
 CREATE TABLE Albums (
