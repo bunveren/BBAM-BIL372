@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtCore import Qt, QSize, QPropertyAnimation
+import os
 
 
 class MainWindow(QMainWindow):
@@ -97,11 +98,13 @@ class MainWindow(QMainWindow):
         self.search_button = QPushButton("Arama")
         self.settings_button = QPushButton("Ayarlar")
 
-        self.profile_button.setIcon(QIcon("resources/profile-svgrepo-com.svg"))
-        self.playlist_button.setIcon(QIcon("resources/music-player-svgrepo-com.svg"))
-        self.artist_button.setIcon(QIcon("resources/musician.svg"))
-        self.search_button.setIcon(QIcon("resources/search-svgrepo-com.svg"))
-        self.settings_button.setIcon(QIcon("resources/settings-svgrepo-com.svg"))
+        basedir = (os.path.dirname(os.path.abspath(__file__)))
+
+        self.profile_button.setIcon(QIcon(os.path.join(basedir, "resources", "profile-svgrepo-com.svg")))
+        self.playlist_button.setIcon(QIcon(os.path.join(basedir, "resources", "music-player-svgrepo-com.svg")))
+        self.artist_button.setIcon(QIcon(os.path.join(basedir, "resources", "musician.svg")))
+        self.search_button.setIcon(QIcon(os.path.join(basedir, "resources", "search-svgrepo-com.svg")))
+        self.settings_button.setIcon(QIcon(os.path.join(basedir, "resources", "settings-svgrepo-com.svg")))
 
         self.profile_button.setStyleSheet("text-align: left;")
         self.playlist_button.setStyleSheet("text-align: left;")
@@ -180,11 +183,12 @@ class MainWindow(QMainWindow):
         setting_category_1 = ["a", "b", "c"]
         setting_category_2 = ["d", "e", "f"]
         settings = [("Category 1", setting_category_1), ("Category 2", setting_category_2)]
+        basedir = (os.path.dirname(os.path.abspath(__file__)))
 
         layout = QVBoxLayout()
         for category_name, setting_list in settings:
             button = QPushButton(category_name)
-            button.setIcon(QIcon("resources/musician-svgrepo-com.svg"))
+            button.setIcon(QIcon(os.path.join(basedir, "resources", "musician-svgrepo-com.svg")))
             button.setStyleSheet("text-align: left; width: 100%;")
             button.clicked.connect(lambda _, s=setting_list: self.show_list_screen(category_name, s, False, True, False)) #setting verince hata
             layout.addWidget(button)
@@ -226,13 +230,14 @@ class MainWindow(QMainWindow):
         profile_picture = QLabel()
         pixmap = QPixmap("resources/thispersondoesnotexist.jpg")
         profile_picture.setPixmap(pixmap.scaled(100, 100))
+        basedir = (os.path.dirname(os.path.abspath(__file__)))
 
         followers_num = len(following)
         followed_by_num = len(followed_by)
         followers_button = QPushButton(f"Takipçiler ({followers_num})")
         following_button = QPushButton(f"Takip Edilenler ({followed_by_num})")
-        followers_button.setIcon(QIcon("resources/follower-svgrepo-com.svg"))
-        following_button.setIcon(QIcon("resources/following-svgrepo-com.svg"))
+        followers_button.setIcon(QIcon(os.path.join(basedir, "resources", "follower-svgrepo-com.svg")))
+        following_button.setIcon(QIcon(os.path.join(basedir, "resources", "following-svgrepo-com.svg")))
         followers_button.setFixedSize(170, 40)
         following_button.setFixedSize(170, 40)
         followers_button.setStyleSheet("text-align: left;")
@@ -272,9 +277,11 @@ class MainWindow(QMainWindow):
 
     def create_artist_screen(self, artist_data):
         layout = QVBoxLayout()
+        basedir = (os.path.dirname(os.path.abspath(__file__)))
+
         for artist, songs in artist_data.items():
             button = QPushButton(artist)
-            button.setIcon(QIcon("resources/musician-svgrepo-com.svg"))
+            button.setIcon(QIcon(os.path.join(basedir, "resources", "musician-svgrepo-com.svg")))
             button.setStyleSheet("text-align: left; width: 100%;")
 
             button.clicked.connect(lambda _, a=artist, s=songs: self.show_list_screen(a, s, False, True, False))
@@ -292,9 +299,11 @@ class MainWindow(QMainWindow):
 
     def create_playlists_screen(self, playlists_data):
         layout = QVBoxLayout()
+        basedir = (os.path.dirname(os.path.abspath(__file__)))
+
         for playlist, songs in playlists_data.items():
             button = QPushButton(playlist)
-            button.setIcon(QIcon("resources/music-player-svgrepo-com.svg"))
+            button.setIcon(QIcon(os.path.join(basedir, "resources", "music-player-svgrepo-com.svg")))
             button.setStyleSheet("text-align: left; width: 100%;")
 
             button.clicked.connect(lambda _, a=playlist, s=songs: self.show_list_screen(a, s, True, False, False))
