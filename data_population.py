@@ -30,7 +30,9 @@ track_titles = [
     "Love Story", "Shape of You", "Hello", "God's Plan", "Formation",
     "Yellow", "No Tears Left to Cry", "Treasure", "Shallow", "Lose Yourself",
     "Blinding Lights", "Peaches", "Diamonds", "Stronger", "Levitating",
-    "Bad Guy", "Watermelon Sugar", "Hands to Myself", "HUMBLE.", "Treat You Better"
+    "Bad Guy", "Watermelon Sugar", "Hands to Myself", "HUMBLE.", "Treat You Better",
+    "As It Was", "Daylight", "Counting Stars", "Senorita", "Uptown Funk",
+    "Someone Like You", "Umbrella", "We Found Love", "Can't Feel My Face", "Late Night Talking"
 ]
 
 playlist_names = [
