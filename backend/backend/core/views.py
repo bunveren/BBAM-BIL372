@@ -28,9 +28,9 @@ def users_list(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def user_detail(request, pk):
+def user_detail(request, user_id):
     try:
-        user = Users.objects.get(pk=pk)
+        user = Users.objects.get(user_id=user_id)
     except Users.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -53,7 +53,7 @@ def user_detail(request, pk):
 #todo ask @betulls
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def user_following(request, pk):
+def user_following(request, user_id):
     try:
         following = UserFollowInteractions.objects.values_list('following', flat=True).get(user_id=pk)
     except UserFollowInteractions.DoesNotExist:
@@ -77,7 +77,7 @@ def user_following(request, pk):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def user_followed_by(request, pk):
+def user_followed_by(request, user_id):
     try:
         followed_by = UserFollowInteractions.objects.values_list('followed_by', flat=True).get(user_id=pk)
     except UserFollowInteractions.DoesNotExist:
@@ -116,9 +116,9 @@ def artists_list(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def artist_detail(request, pk):
+def artist_detail(request, artist_id):
     try:
-        artist = Artists.objects.get(pk=pk)
+        artist = Artists.objects.get(artist_id=artist_id)
     except Artists.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -154,9 +154,9 @@ def tracks_list(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def track_detail(request, pk):
+def track_detail(request, track_id):
     try:
-        track = Tracks.objects.get(pk=pk)
+        track = Tracks.objects.get(track_id=track_id)
     except Tracks.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -193,9 +193,9 @@ def all_albums(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])  # /api/albums/{album_id}
-def album_detail(request, pk):
+def album_detail(request, album_id):
     try:
-        album = Albums.objects.get(pk=pk)
+        album = Albums.objects.get(album_id=album_id)
     except Albums.DoesNotExist:
         return Response({"error": "Album not found"}, status=404)
 
@@ -266,7 +266,7 @@ def all_user_playlists(request, user_id):
 @api_view(['GET', 'PUT', 'DELETE'])  # /api/playlists/users/{user_id}/{playlist_id}
 def playlist_detail(request, user_id, playlist_id):
     try:
-        playlist = Playlists.objects.get(user_id=user_id, Playlist_ID=playlist_id)
+        playlist = Playlists.objects.get(user_id=user_id, playlist_id=playlist_id)
     except Playlists.DoesNotExist:
         return Response({"error": "Playlist not found"}, status=404)
 
@@ -316,9 +316,9 @@ def user_interaction(request, user_id, track_id):
 
 # Recently_Listened
 @api_view(['GET', 'POST', 'DELETE'])  # /api/recently_listened/{user_id}/{track_id}
-def recently_listened(request, user_id, track_id):
+def recently_listened(request, user_id):
     try:
-        recently_listened_entry = RecentlyListened.objects.get(user_id=user_id, track_id=track_id)
+        recently_listened_entry = RecentlyListened.objects.get(user_id=user_id)
     except RecentlyListened.DoesNotExist:
         return Response({"error": "Recently listened entry not found"}, status=404)
 
