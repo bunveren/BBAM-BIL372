@@ -289,5 +289,5 @@ user_follow_interactions = generate_user_follow_interactions(user_ids)
 # Takip ilişkisini tabloya ekleme
 insert_user_follow_interactions(user_follow_interactions)
 
-
+#close
 db.close()
