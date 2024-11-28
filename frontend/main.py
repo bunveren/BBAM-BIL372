@@ -127,7 +127,10 @@ class MainWindow(QMainWindow):
 
         self.stack = QStackedWidget()
 
-        self.profile_screen = self.start_screen()
+        following = ["User1", "User2", "User3"]
+        followed_by = ["UserA", "UserB", "UserC"]
+
+        self.start_screen = self.start_screen(following,followed_by)
 
         playlists_data = {
             "Liste 1": ["Şarkı A", "Şarkı B", "Şarkı C"],
@@ -149,7 +152,7 @@ class MainWindow(QMainWindow):
         self.search_screen = self.create_search_screen()
         self.settings_screen = self.create_settings_screen()
 
-        self.stack.addWidget(self.profile_screen)
+        self.stack.addWidget(self.start_screen)
         self.stack.addWidget(self.playlist_screen)
         self.stack.addWidget(self.artist_screen)
         self.stack.addWidget(self.search_screen)
@@ -167,31 +170,29 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-        self.profile_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
+        self.profile_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
         self.playlist_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.playlist_screen))
         self.artist_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.artist_screen))
         self.search_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.search_screen))
         self.settings_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.settings_screen))
 
     def create_settings_screen(self):
+        setting_category_1 = ["a", "b", "c"]
+        setting_category_2 = ["d", "e", "f"]
+        settings = [("Category 1", setting_category_1), ("Category 2", setting_category_2)]
+
         layout = QVBoxLayout()
+        for category_name, setting_list in settings:
+            button = QPushButton(category_name)
+            button.setIcon(QIcon("resources/musician-svgrepo-com.svg"))
+            button.setStyleSheet("text-align: left; width: 100%;")
+            button.clicked.connect(lambda _, s=setting_list: self.show_list_screen(category_name, s, False, True, False)) #setting verince hata
+            layout.addWidget(button)
 
-        arb_button1 = QPushButton("a")
-        arb_button2 = QPushButton("b")
-        arb_button1.setIcon(QIcon("resources/mix-svgrepo-com.svg"))
-        arb_button2.setIcon(QIcon("resources/musician-svgrepo-com.svg"))
-
-        arb_button1.setStyleSheet("text-align: left; width: 100%;")
-        arb_button2.setStyleSheet("text-align: left; width: 100%;")
-
-        arb_button1.clicked.connect(lambda: self.show_list_screen("ayar1", ["a", "b", "c"]))
-        arb_button2.clicked.connect(lambda: self.show_list_screen("ayar2", ["d", "e", "f"]))
-
-        layout.addWidget(arb_button1)
-        layout.addWidget(arb_button2)
         layout.addStretch()
+
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
+        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
         layout.addWidget(home_button)
 
         container = QWidget()
@@ -217,7 +218,7 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(continue_container)
         self.stack.setCurrentWidget(continue_container)
 
-    def start_screen(self):
+    def start_screen(self, following, followed_by):
         username = "Seda"
         username_label = QLabel(f"Tekrar hoş geldin {username}!")
         username_label.setStyleSheet("font-family: Arial; font-size: 35px; font-weight: bold;")
@@ -226,10 +227,10 @@ class MainWindow(QMainWindow):
         pixmap = QPixmap("resources/thispersondoesnotexist.jpg")
         profile_picture.setPixmap(pixmap.scaled(100, 100))
 
-        followers = 5
-        followed_by = 2
-        followers_button = QPushButton(f"Takipçiler ({followers})")
-        following_button = QPushButton(f"Takip Edilenler ({followed_by})")
+        followers_num = len(following)
+        followed_by_num = len(followed_by)
+        followers_button = QPushButton(f"Takipçiler ({followers_num})")
+        following_button = QPushButton(f"Takip Edilenler ({followed_by_num})")
         followers_button.setIcon(QIcon("resources/follower-svgrepo-com.svg"))
         following_button.setIcon(QIcon("resources/following-svgrepo-com.svg"))
         followers_button.setFixedSize(170, 40)
@@ -237,8 +238,8 @@ class MainWindow(QMainWindow):
         followers_button.setStyleSheet("text-align: left;")
         following_button.setStyleSheet("text-align: left;")
 
-        followers_button.clicked.connect(lambda: self.show_list_screen("Takipçiler", ["User1", "User2", "User3"]))
-        following_button.clicked.connect(lambda: self.show_list_screen("Takip Edilenler", ["UserA", "UserB", "UserC"]))
+        followers_button.clicked.connect(lambda: self.show_list_screen("Takipçiler", following, False, False, False))
+        following_button.clicked.connect(lambda: self.show_list_screen("Takip Edilenler", followed_by, False, False, False))
 
         profile_layout = QHBoxLayout()
         profile_layout.addWidget(profile_picture)
@@ -276,13 +277,13 @@ class MainWindow(QMainWindow):
             button.setIcon(QIcon("resources/musician-svgrepo-com.svg"))
             button.setStyleSheet("text-align: left; width: 100%;")
 
-            button.clicked.connect(lambda _, a=artist, s=songs: self.show_list_screen(a, s))
+            button.clicked.connect(lambda _, a=artist, s=songs: self.show_list_screen(a, s, False, True, False))
             layout.addWidget(button)
 
         layout.addStretch()
 
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
+        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
         layout.addWidget(home_button)
 
         container = QWidget()
@@ -296,13 +297,13 @@ class MainWindow(QMainWindow):
             button.setIcon(QIcon("resources/music-player-svgrepo-com.svg"))
             button.setStyleSheet("text-align: left; width: 100%;")
 
-            button.clicked.connect(lambda _, a=playlist, s=songs: self.show_list_screen(a, s))
+            button.clicked.connect(lambda _, a=playlist, s=songs: self.show_list_screen(a, s, True, False, False))
             layout.addWidget(button)
 
         layout.addStretch()
 
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
+        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
         layout.addWidget(home_button)
 
         container = QWidget()
@@ -317,13 +318,13 @@ class MainWindow(QMainWindow):
 
         layout.addWidget(search_label)
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
+        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
         layout.addWidget(home_button)
         container = QWidget()
         container.setLayout(layout)
         return container
 
-    def show_list_screen(self, title, items):
+    def show_list_screen(self, title, items, is_song, is_artist, is_setting):
         layout = QVBoxLayout()
 
         label = QLabel(title)
@@ -336,14 +337,53 @@ class MainWindow(QMainWindow):
         layout.addWidget(label)
         layout.addWidget(list_widget)
 
+        if is_song:
+            list_widget.itemClicked.connect(self.on_song_clicked)
+        if is_setting:
+            list_widget.itemClicked.connect(self.start_screen)
+        if is_artist:
+            list_widget.itemClicked.connect(self.on_person_clicked) #todo change
+        else:
+            list_widget.itemClicked.connect(self.on_person_clicked)
+
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
+        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
         layout.addWidget(home_button)
 
         container = QWidget()
         container.setLayout(layout)
         self.stack.addWidget(container)
         self.stack.setCurrentWidget(container)
+
+    def on_song_clicked(self, item):
+        text = item.text()
+        container = QWidget()
+        label = QLabel(f"'{text}' için şarkılar burada görünecek.")
+        layout = QVBoxLayout()
+        layout.addWidget(label)
+        layout.addStretch()
+        home_button = QPushButton("Ana Sayfa")
+        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        layout.addWidget(home_button)
+        container.setLayout(layout)
+        self.stack.addWidget(container)
+        self.stack.setCurrentWidget(container)
+
+    def on_person_clicked(self, item):
+        text = item.text()
+        container = QWidget()
+        label = QLabel(f"'{text}' için profil burada görünecek.")
+        layout = QVBoxLayout()
+        layout.addWidget(label)
+        layout.addStretch()
+        home_button = QPushButton("Ana Sayfa")
+        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        layout.addWidget(home_button)
+        container.setLayout(layout)
+        self.stack.addWidget(container)
+        self.stack.setCurrentWidget(container)
+
+# todo
 
     def load_artists(self, item):
         return
