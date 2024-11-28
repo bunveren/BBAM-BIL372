@@ -55,48 +55,48 @@ def user_detail(request, pk):
 @api_view(['GET', 'PUT', 'DELETE'])
 def user_following(request, pk):
     try:
-        following = UserFollowInteractions.objects.values_list('Following', flat=True).get(User_ID=pk)
+        following = UserFollowInteractions.objects.values_list('following', flat=True).get(user_id=pk)
     except UserFollowInteractions.DoesNotExist:
         return Response({'error': 'User_Follow_Interactions not found.'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        return Response({'Following': following}, status=status.HTTP_200_OK)
+        return Response({'following': following}, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        new_following = request.data.get('Following', None)
+        new_following = request.data.get('following', None)
         if new_following is not None:
-            user_interaction.Following = new_following
+            user_interaction.following = new_following
             user_interaction.save()
-            return Response({'message': 'Following updated successfully.'}, status=status.HTTP_200_OK)
+            return Response({'message': 'following updated successfully.'}, status=status.HTTP_200_OK)
 
         return Response({'error': 'Invalid data provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        user_interaction.Following.delete()
+        user_interaction.following.delete()
         return Response({'message': 'User_Follow_Interactions:Following deleted successfully.'}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def user_followed_by(request, pk):
     try:
-        followed_by = UserFollowInteractions.objects.values_list('Followed_by', flat=True).get(User_ID=pk)
+        followed_by = UserFollowInteractions.objects.values_list('followed_by', flat=True).get(user_id=pk)
     except UserFollowInteractions.DoesNotExist:
         return Response({'error': 'User_Follow_Interactions not found.'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        return Response({'Followed_by': followed_by}, status=status.HTTP_200_OK)
+        return Response({'followed_by': followed_by}, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        new_following = request.data.get('Following', None)
-        if new_following is not None:
-            user_interaction.Followed_by = new_following
+        new_followed = request.data.get('followed_by', None)
+        if new_followed is not None:
+            user_interaction.followed_by = new_followed
             user_interaction.save()
             return Response({'message': 'Followed by updated successfully.'}, status=status.HTTP_200_OK)
 
         return Response({'error': 'Invalid data provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        user_interaction.Followed_by.delete()
+        user_interaction.followed_by.delete()
         return Response({'message': 'User_Follow_Interactions:Followed_by deleted successfully.'}, status=status.HTTP_200_OK)
 
 
@@ -218,7 +218,7 @@ def album_detail(request, pk):
 @api_view(['GET'])  # /api/albums/artists/{artist_id}
 def artist_albums(request, artist_id):
     try:
-        albums = Albums.objects.filter(Artist_ID=artist_id)
+        albums = Albums.objects.filter(artist_id=artist_id)
         if not albums.exists():
             return Response({"error": "No albums found for this artist"}, status=404)
         serializer = AlbumsSerializer(albums, many=True)
@@ -247,7 +247,7 @@ def artist_albums(request, artist_id):
 @api_view(['GET', 'POST'])  # /api/playlists/users/{user_id}
 def all_user_playlists(request, user_id):
     if request.method == 'GET':
-        playlists = Playlists.objects.filter(User_ID=user_id)
+        playlists = Playlists.objects.filter(user_id=user_id)
         if playlists.exists():
             serializer = PlaylistsSerializer(playlists, many=True)
             return Response(serializer.data, status=200)
@@ -255,7 +255,7 @@ def all_user_playlists(request, user_id):
 
     elif request.method == 'POST':
         data = request.data
-        data['User_ID'] = user_id
+        data['user_id'] = user_id
         serializer = PlaylistsSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -266,7 +266,7 @@ def all_user_playlists(request, user_id):
 @api_view(['GET', 'PUT', 'DELETE'])  # /api/playlists/users/{user_id}/{playlist_id}
 def playlist_detail(request, user_id, playlist_id):
     try:
-        playlist = Playlists.objects.get(User_ID=user_id, Playlist_ID=playlist_id)
+        playlist = Playlists.objects.get(user_id=user_id, Playlist_ID=playlist_id)
     except Playlists.DoesNotExist:
         return Response({"error": "Playlist not found"}, status=404)
 
@@ -291,7 +291,7 @@ def playlist_detail(request, user_id, playlist_id):
 @api_view(['GET', 'POST', 'DELETE'])  # api/user_interactions/{user_id}/{track_id}
 def user_interaction(request, user_id, track_id):
     try:
-        interaction = UserInteractions.objects.get(User_ID=user_id, Track_ID=track_id)
+        interaction = UserInteractions.objects.get(user_id=user_id, track_id=track_id)
     except UserInteractions.DoesNotExist:
         return Response({"error": "Interaction not found"}, status=404)
 
@@ -318,7 +318,7 @@ def user_interaction(request, user_id, track_id):
 @api_view(['GET', 'POST', 'DELETE'])  # /api/recently_listened/{user_id}/{track_id}
 def recently_listened(request, user_id, track_id):
     try:
-        recently_listened_entry = RecentlyListened.objects.get(User_ID=user_id, Track_ID=track_id)
+        recently_listened_entry = RecentlyListened.objects.get(user_id=user_id, track_id=track_id)
     except RecentlyListened.DoesNotExist:
         return Response({"error": "Recently listened entry not found"}, status=404)
 
