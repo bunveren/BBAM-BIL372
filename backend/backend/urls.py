@@ -15,30 +15,31 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from backend.core import views
+from django.urls import path, include
+from .core import views
 
 urlpatterns = [
-    path('/api/admin/', admin.site.urls),
-    path('/api/users/', views.users_list, name='users_list'),
-    path('/api/users/<int:pk>/', views.user_detail, name='user_detail'),
+    path('admin/', admin.site.urls),
+    path('api/admin/', admin.site.urls),
+    path('api/users/', views.users_list, name='users_list'),
+    path('api/users/<int:user_id>/', views.user_detail, name='user_detail'),
 
-    path('/api/user-follow/', views.user_follow_list, name='user_follow_list'),
-    path('/api/user-follow/<int:pk>/', views.user_follow_detail, name='user_follow_detail'),
+    path('api/user_following/<int:user_id>/', views.user_following, name='user_following'),
+    path('api/user_followed/<int:user_id>/', views.user_followed_by, name='user_followed_by'),
 
-    path('/api/artists/', views.artists_list, name='artists_list'),
-    path('/api/artists/<int:pk>/', views.artist_detail, name='artist_detail'),
+    path('api/artists/', views.artists_list, name='artists_list'),
+    path('api/artists/<int:artist_id>/', views.artist_detail, name='artist_detail'),
 
-    path('/api/tracks/', views.tracks_list, name='tracks_list'),
-    path('/api/tracks/<int:pk>/', views.track_detail, name='track_detail'),
+    path('api/tracks/', views.tracks_list, name='tracks_list'),
+    path('api/tracks/<int:track_id>/', views.track_detail, name='track_detail'),
 
-    path('/api/albums/', views.all_albums, name='all-albums'),
-    path('/api/albums/<int:album_id>/', views.album_detail, name='album-detail'),
-    path('/api/albums/artists/<int:artist_id>/', views.artist_albums, name='artist-albums'),
+    path('api/albums/', views.all_albums, name='all-albums'),
+    path('api/albums/<int:album_id>/', views.album_detail, name='album-detail'),
+    path('api/albums/artists/<int:artist_id>/', views.artist_albums, name='artist-albums'),
 
-    path('/api/playlists/users/<int:user_id>/', views.all_user_playlists, name='all-user-playlists'),
-    path('/api/playlists/users/<int:user_id>/<int:playlist_id>/', views.playlist_detail, name='playlist-detail'),
+    path('api/playlists/users/<int:user_id>/', views.all_user_playlists, name='all-user-playlists'),
+    path('api/playlists/users/<int:user_id>/<int:playlist_id>/', views.playlist_detail, name='playlist-detail'),
     
-    path('/api/user_interactions/<int:user_id>/<int:track_id>/', views.user_interaction, name='user-interaction'),
-    path('/api/recently_listened/<int:user_id>/<int:track_id>/', views.recently_listened, name='recently-listened')
+    path('api/user_interactions/<int:user_id>/<int:track_id>/', views.user_interaction, name='user-interaction'),
+    path('api/recently_listened/<int:user_id>/', views.recently_listened, name='recently-listened')
 ]
