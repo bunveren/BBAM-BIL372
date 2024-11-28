@@ -11,8 +11,7 @@ CREATE TABLE Artists (
     Artist_ID SERIAL PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
     Biography TEXT,
-    Genre VARCHAR(50),
-    Songs JSON
+    Genre VARCHAR(50)
 );
 
 CREATE TABLE Albums (
