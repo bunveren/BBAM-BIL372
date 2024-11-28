@@ -1,6 +1,5 @@
 # import backend.core.views
 # todo add play-pause buttons for visual
-# todo make the other users' and artists' pages accessible
 # todo make search tab useful????
 
 from PyQt5.QtWidgets import (

@@ -20,7 +20,7 @@ class Playlists(models.Model):
     Tracks = models.JSONField(default = list)
 
 
-class User_Interactions:
+class User_Interactions(models.Model):
     Interaction_ID = models.AutoField(primary_key = True)
     User_ID = models.ForeignKey(
         'Users',
@@ -31,9 +31,9 @@ class User_Interactions:
         on_delete = models.CASCADE
     )
     Liked = models.BooleanField()
-    Timestamp = models.IntegerField(default = 0, max_length = 1000)
+    Timestamp = models.IntegerField(default = 0)
 
-class Recently_Listened:
+class Recently_Listened(models.Model):
     Recently_Listened_ID = models.AutoField(primary_key = True)
     User_ID = models.ForeignKey(
         'Users',
@@ -58,6 +58,8 @@ class User_Follow_Interactions(models.Model):
     User_ID = models.ForeignKey('Users', on_delete=models.CASCADE)
     Following = models.JSONField(default=list)
     Followed_by = models.JSONField(default=list)
+    def __str__(self):
+        return f"User {self.User_ID} follow interactions"
 
 class Artists(models.Model):
     Artist_ID = models.AutoField(primary_key=True)
