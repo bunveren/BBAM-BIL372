@@ -55,8 +55,8 @@ def user_detail(request, pk):
 @api_view(['GET', 'PUT', 'DELETE'])
 def user_following(request, pk):
     try:
-        following = User_Follow_Interactions.objects.values_list('Following', flat=True).get(User_ID=pk)
-    except User_Follow_Interactions.DoesNotExist:
+        following = UserFollowInteractions.objects.values_list('Following', flat=True).get(User_ID=pk)
+    except UserFollowInteractions.DoesNotExist:
         return Response({'error': 'User_Follow_Interactions not found.'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -79,8 +79,8 @@ def user_following(request, pk):
 @api_view(['GET', 'PUT', 'DELETE'])
 def user_followed_by(request, pk):
     try:
-        followed_by = User_Follow_Interactions.objects.values_list('Followed_by', flat=True).get(User_ID=pk)
-    except User_Follow_Interactions.DoesNotExist:
+        followed_by = UserFollowInteractions.objects.values_list('Followed_by', flat=True).get(User_ID=pk)
+    except UserFollowInteractions.DoesNotExist:
         return Response({'error': 'User_Follow_Interactions not found.'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -291,8 +291,8 @@ def playlist_detail(request, user_id, playlist_id):
 @api_view(['GET', 'POST', 'DELETE'])  # api/user_interactions/{user_id}/{track_id}
 def user_interaction(request, user_id, track_id):
     try:
-        interaction = User_Interactions.objects.get(User_ID=user_id, Track_ID=track_id)
-    except User_Interactions.DoesNotExist:
+        interaction = UserInteractions.objects.get(User_ID=user_id, Track_ID=track_id)
+    except UserInteractions.DoesNotExist:
         return Response({"error": "Interaction not found"}, status=404)
 
     if request.method == 'GET':
@@ -318,8 +318,8 @@ def user_interaction(request, user_id, track_id):
 @api_view(['GET', 'POST', 'DELETE'])  # /api/recently_listened/{user_id}/{track_id}
 def recently_listened(request, user_id, track_id):
     try:
-        recently_listened_entry = Recently_Listened.objects.get(User_ID=user_id, Track_ID=track_id)
-    except Recently_Listened.DoesNotExist:
+        recently_listened_entry = RecentlyListened.objects.get(User_ID=user_id, Track_ID=track_id)
+    except RecentlyListened.DoesNotExist:
         return Response({"error": "Recently listened entry not found"}, status=404)
 
     if request.method == 'GET':
