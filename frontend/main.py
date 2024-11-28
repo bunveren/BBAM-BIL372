@@ -177,22 +177,20 @@ class MainWindow(QMainWindow):
         self.settings_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.settings_screen))
 
     def create_settings_screen(self):
+        setting_category_1 = ["a", "b", "c"]
+        setting_category_2 = ["d", "e", "f"]
+        settings = [("Category 1", setting_category_1), ("Category 2", setting_category_2)]
+
         layout = QVBoxLayout()
+        for category_name, setting_list in settings:
+            button = QPushButton(category_name)
+            button.setIcon(QIcon("resources/musician-svgrepo-com.svg"))
+            button.setStyleSheet("text-align: left; width: 100%;")
+            button.clicked.connect(lambda _, s=setting_list: self.show_list_screen(category_name, s, False, True, False)) #setting verince hata
+            layout.addWidget(button)
 
-        arb_button1 = QPushButton("a")
-        arb_button2 = QPushButton("b")
-        arb_button1.setIcon(QIcon("resources/mix-svgrepo-com.svg"))
-        arb_button2.setIcon(QIcon("resources/musician-svgrepo-com.svg"))
-
-        arb_button1.setStyleSheet("text-align: left; width: 100%;")
-        arb_button2.setStyleSheet("text-align: left; width: 100%;")
-
-        arb_button1.clicked.connect(lambda: self.show_list_screen("ayar1", ["a", "b", "c"]))
-        arb_button2.clicked.connect(lambda: self.show_list_screen("ayar2", ["d", "e", "f"]))
-
-        layout.addWidget(arb_button1)
-        layout.addWidget(arb_button2)
         layout.addStretch()
+
         home_button = QPushButton("Ana Sayfa")
         home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
         layout.addWidget(home_button)
@@ -240,8 +238,8 @@ class MainWindow(QMainWindow):
         followers_button.setStyleSheet("text-align: left;")
         following_button.setStyleSheet("text-align: left;")
 
-        followers_button.clicked.connect(lambda: self.show_list_screen("Takipçiler", following, False))
-        following_button.clicked.connect(lambda: self.show_list_screen("Takip Edilenler", followed_by, False))
+        followers_button.clicked.connect(lambda: self.show_list_screen("Takipçiler", following, False, False, False))
+        following_button.clicked.connect(lambda: self.show_list_screen("Takip Edilenler", followed_by, False, False, False))
 
         profile_layout = QHBoxLayout()
         profile_layout.addWidget(profile_picture)
@@ -279,7 +277,7 @@ class MainWindow(QMainWindow):
             button.setIcon(QIcon("resources/musician-svgrepo-com.svg"))
             button.setStyleSheet("text-align: left; width: 100%;")
 
-            button.clicked.connect(lambda _, a=artist, s=songs: self.show_list_screen(a, s, False))
+            button.clicked.connect(lambda _, a=artist, s=songs: self.show_list_screen(a, s, False, True, False))
             layout.addWidget(button)
 
         layout.addStretch()
@@ -299,7 +297,7 @@ class MainWindow(QMainWindow):
             button.setIcon(QIcon("resources/music-player-svgrepo-com.svg"))
             button.setStyleSheet("text-align: left; width: 100%;")
 
-            button.clicked.connect(lambda _, a=playlist, s=songs: self.show_list_screen(a, s, True))
+            button.clicked.connect(lambda _, a=playlist, s=songs: self.show_list_screen(a, s, True, False, False))
             layout.addWidget(button)
 
         layout.addStretch()
@@ -326,9 +324,7 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         return container
 
-
-
-    def show_list_screen(self, title, items, is_song):
+    def show_list_screen(self, title, items, is_song, is_artist, is_setting):
         layout = QVBoxLayout()
 
         label = QLabel(title)
@@ -343,6 +339,10 @@ class MainWindow(QMainWindow):
 
         if is_song:
             list_widget.itemClicked.connect(self.on_song_clicked)
+        if is_setting:
+            list_widget.itemClicked.connect(self.start_screen)
+        if is_artist:
+            list_widget.itemClicked.connect(self.on_person_clicked) #todo change
         else:
             list_widget.itemClicked.connect(self.on_person_clicked)
 
@@ -383,6 +383,7 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(container)
         self.stack.setCurrentWidget(container)
 
+# todo
 
     def load_artists(self, item):
         return
