@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
-    Albums, Playlists, User_Interactions, Recently_Listened, 
-    Users, User_Follow_Interactions, Artists, Tracks
+    Albums, Playlists, UserInteractions, RecentlyListened, 
+    Users, UserFollowInteractions, Artists, Tracks
 )
 
 class PlaylistsSerializer(serializers.ModelSerializer):
@@ -12,13 +12,13 @@ class PlaylistsSerializer(serializers.ModelSerializer):
 
 class UserInteractionsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User_Interactions
+        model = UserInteractions
         fields = '__all__'
 
 
 class RecentlyListenedSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Recently_Listened
+        model = RecentlyListened
         fields = '__all__'
 
 
@@ -30,7 +30,7 @@ class UsersSerializer(serializers.ModelSerializer):
 
 class UserFollowInteractionsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User_Follow_Interactions
+        model = UserFollowInteractions
         fields = '__all__'
 
 

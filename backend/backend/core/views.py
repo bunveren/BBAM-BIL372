@@ -1,6 +1,6 @@
 from rest_framework import status
-from .models import Users, User_Follow_Interactions, Artists, Albums, Tracks, Playlists, User_Interactions, \
-    Recently_Listened
+from .models import Users, UserFollowInteractions, Artists, Albums, Tracks, Playlists, UserInteractions, \
+    RecentlyListened
 from .serializers import UsersSerializer, UserFollowInteractionsSerializer, ArtistsSerializer, AlbumsSerializer, \
     TracksSerializer, PlaylistsSerializer, UserInteractionsSerializer, RecentlyListenedSerializer
 from rest_framework.decorators import api_view
