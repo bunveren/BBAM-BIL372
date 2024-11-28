@@ -3,7 +3,6 @@ import random
 import json
 from datetime import datetime, timedelta
 
-# MySQL bağlantısı
 db = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -13,7 +12,6 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 
-# Anlamlı isimler listeleri
 artist_names = [
     "Taylor Swift", "Ed Sheeran", "Adele", "Drake", "Beyoncé",
     "Coldplay", "Ariana Grande", "Bruno Mars", "Lady Gaga", "Eminem",
@@ -43,7 +41,6 @@ playlist_names = [
     "Party Anthems", "Road Trip", "Focus Beats", "Love Songs", "Indie Pop Gems",
 ]
 
-# Rastgele tarih üretme fonksiyonu
 def random_date(start, end):
     delta = end - start
     random_days = random.randint(0, delta.days)
@@ -52,16 +49,14 @@ def random_date(start, end):
 def generate_users(num_users):
     users = []
     for i in range(num_users):
-        username = f'user_{i + 1}_{random.randint(1000, 9999)}'  # Benzersiz kullanıcı adı
+        username = f'user_{i + 1}_{random.randint(1000, 9999)}'  
         password = f'password_{i + 1}'
-        email = f'user_{i + 1}_{random.randint(1000, 9999)}@example.com'  # Benzersiz e-posta
+        email = f'user_{i + 1}_{random.randint(1000, 9999)}@example.com'
         subscription_type = random.choice(['Free', 'Premium'])
         created_at = random_date(datetime(2020, 1, 1), datetime(2024, 11, 27)).strftime('%Y-%m-%d')
         users.append((username, password, email, subscription_type, created_at))
     return users
 
-
-# Sanatçı verisi oluşturma
 def generate_artists(num_artists):
     artists = []
     selected_artists = random.sample(artist_names, num_artists)
@@ -81,7 +76,6 @@ def generate_albums(num_albums, artist_ids):
         albums.append((title, release_date, artist_id))
     return albums
 
-# Parça verisi oluşturma
 def generate_tracks(num_tracks, album_ids, album_artist_map, all_artist_ids):
     tracks = []
     selected_tracks = random.choices(track_titles, k=num_tracks)
@@ -89,7 +83,6 @@ def generate_tracks(num_tracks, album_ids, album_artist_map, all_artist_ids):
         duration = random.randint(120, 300)  # Süre saniye cinsinden
         album_id = random.choice(album_ids)
         primary_artist_id  = album_artist_map[album_id]
-        # Rastgele diğer sanatçılar seçilir
         other_artist_ids = random.sample(all_artist_ids, random.randint(0, 3))
         if primary_artist_id not in other_artist_ids:
             other_artist_ids.append(primary_artist_id) 
@@ -100,48 +93,39 @@ def generate_tracks(num_tracks, album_ids, album_artist_map, all_artist_ids):
         tracks.append((title, duration, album_id, genre, file_path, artists_id, play_count))
     return tracks
 
-# Playlist verisi oluşturma
 def generate_playlists(num_playlists, user_ids):
     playlists = []
     selected_playlists = random.sample(playlist_names, num_playlists)
     for i, name in enumerate(selected_playlists):
         user_id = random.choice(user_ids)
         created_at = random_date(datetime(2020, 1, 1), datetime(2024, 11, 27)).strftime('%Y-%m-%d')
-        contained_items = json.dumps(random.sample(range(1, 100), 5))  # Rastgele içerik
+        contained_items = json.dumps(random.sample(range(1, 100), 5))
         playlists.append((user_id, name, created_at, contained_items))
     return playlists
 
 def generate_recently_listened(user_ids, track_ids, track_play_counts, tracks_per_user=10):
     recently_listened = []
     for user_id in user_ids:
-        # Rastgele bu kullanıcı için 10 şarkı seç
         selected_tracks = random.sample(track_ids, tracks_per_user)
         
         for track_id in selected_tracks:
-            # Track'in toplam play_count'unu al
             global_play_count = track_play_counts[track_id]
-            # Bu kullanıcı için özel play_count belirle (her zaman global'den küçük)
-            user_play_count = random.randint(1, max(global_play_count - 1, 1))  # Minimum 1 oynatma
-            
-            # Rastgele bir zaman damgası oluştur
+            user_play_count = random.randint(1, max(global_play_count - 1, 1))
             timestamp = random_date(datetime(2020, 1, 1), datetime.now()).strftime('%Y-%m-%d %H:%M:%S')
             recently_listened.append((user_id, track_id, timestamp, user_play_count))
     
     return recently_listened
 
-# User Interactions verisi oluşturma
 def generate_user_interactions(user_ids, track_data):
     user_interactions = []
     for user_id in user_ids:
-        # Rastgele şarkılar seç
-        selected_tracks = random.sample(track_data, random.randint(5, 15))  # Rastgele 5-15 parça seç
+        selected_tracks = random.sample(track_data, random.randint(5, 15))
         for track_id, duration in selected_tracks:
-            liked = random.choice([True, False])  # Rastgele beğenildi/beğenilmedi
-            timestamp = random.randint(0, duration - 1)  # Duration'dan küçük bir zaman damgası
+            liked = random.choice([True, False])
+            timestamp = random.randint(0, duration - 1)
             user_interactions.append((user_id, track_id, liked, timestamp))
     return user_interactions
 
-# Tablolara veri ekleme fonksiyonları
 def insert_users(users):
     query = "INSERT INTO Users (Username, Password, Email, Subscription_type, Created_at) VALUES (%s, %s, %s, %s, %s)"
     cursor.executemany(query, users)
@@ -223,5 +207,4 @@ track_data_duration = cursor.fetchall()
 user_interactions = generate_user_interactions(user_ids, track_data_duration)
 insert_user_interactions(user_interactions)
 
-# Bağlantıyı kapat
 db.close()
