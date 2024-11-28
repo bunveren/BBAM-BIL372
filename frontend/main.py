@@ -207,7 +207,7 @@ class MainWindow(QMainWindow):
         new_screen_label.setFont(QFont("Arial", 18))
 
         back_button = QPushButton("Ana Sayfa")
-        back_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.profile_screen))
+        back_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
 
         layout.addWidget(new_screen_label)
         layout.addWidget(back_button)

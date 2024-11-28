@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework'
+    'rest_framework',
+    'backend.core'
 ]
 
 MIDDLEWARE = [
@@ -77,9 +78,9 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'music_platform',
-        'USER': 'your_username',
-        'PASSWORD': 'your_password',
+        'NAME': '372',
+        'USER': 'root',
+        'PASSWORD': '14072004',
         'HOST': 'localhost',
         'PORT': '3306',
     }

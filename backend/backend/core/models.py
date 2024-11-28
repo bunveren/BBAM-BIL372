@@ -19,6 +19,7 @@ class Playlists(models.Model):
     Created_at = models.DateField()
     Tracks = models.JSONField(default = list)
 
+
 class User_Interactions:
     Interaction_ID = models.AutoField(primary_key = True)
     User_ID = models.ForeignKey(
@@ -71,6 +72,6 @@ class Tracks(models.Model):
     Album_ID = models.ForeignKey('Albums', on_delete=models.CASCADE)
     Title = models.CharField(max_length=100)
     Genre = models.TextField(max_length=100)
-    Duration = models.IntegerField(default=0, max_length=1000)
+    Duration = models.IntegerField(default=0)
     File_Path = models.CharField(max_length=255)
     Play_count = models.IntegerField(default=0)

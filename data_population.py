@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="melis",
-    database="bbam"
+    password="14072004",
+    database="372"
 )
 
 cursor = db.cursor()
