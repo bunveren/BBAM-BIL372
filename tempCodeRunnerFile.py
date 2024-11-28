@@ -134,35 +134,80 @@ def generate_user_interactions(user_ids, track_data):
 
 
 
-def generate_user_follow_interactions(user_ids):
-    """
-    Generates consistent Following and Followed_By relationships for users only.
-    """
-    # Initialize relationships for all users
-    follow_interactions = {user_id: {"Following": set(), "Followed_By": set()} for user_id in user_ids}
 
-    # Generate Following and Followed_By relationships
+def generate_user_follow_interactions(user_ids, artist_ids):
+    """
+    Kullanıcıların ve sanatçıların takip ilişkilerini oluşturur.
+    """
+    user_follow_interactions = {}
+    artist_follow_interactions = {}
+
+    # Her kullanıcı için Following ve Followed_By ilişkisi oluştur
     for user_id in user_ids:
-        # Randomly select other users to follow (excluding self)
+        # Kullanıcının takip ettiği diğer kullanıcılar ve sanatçılar
         following_users = random.sample(
             [uid for uid in user_ids if uid != user_id], random.randint(0, 5)
         )
+        following_artists = random.sample(artist_ids, random.randint(0, 3))
+        following = following_users + following_artists
 
-        # Add to Following and update Followed_By for the followed users
-        follow_interactions[user_id]["Following"].update(following_users)
-        for followed_user in following_users:
-            follow_interactions[followed_user]["Followed_By"].add(user_id)
+        # Kullanıcıyı takip edenler (Followed_By)
+        followed_by = []
 
-    # Convert sets to JSON-compatible lists for database insertion
+        # Following ilişkilerini kaydet
+        user_follow_interactions[user_id] = {"Following": following, "Followed_By": followed_by}
+
+    # Her sanatçı için Following ve Followed_By ilişkisi oluştur
+    for artist_id in artist_ids:
+        # Sanatçının takip ettiği kullanıcılar
+        following_users = random.sample(user_ids, random.randint(0, 3))
+        following_artists = random.sample(
+            [aid for aid in artist_ids if aid != artist_id], random.randint(0, 3)
+        )
+        following = following_users + following_artists
+
+        # Sanatçıyı takip eden kullanıcılar
+        followed_by = []
+
+        # Following ilişkilerini kaydet
+        artist_follow_interactions[artist_id] = {"Following": following, "Followed_By": followed_by}
+
+    # Followed_By alanını doldurmak için tüm kullanıcı ve sanatçı ilişkilerini işleyin
+    for user_id, relations in user_follow_interactions.items():
+        for followed in relations["Following"]:
+            if followed in user_follow_interactions:
+                user_follow_interactions[followed]["Followed_By"].append(user_id)
+            elif followed in artist_follow_interactions:
+                artist_follow_interactions[followed]["Followed_By"].append(user_id)
+
+    for artist_id, relations in artist_follow_interactions.items():
+        for followed in relations["Following"]:
+            if followed in user_follow_interactions:
+                user_follow_interactions[followed]["Followed_By"].append(artist_id)
+            elif followed in artist_follow_interactions:
+                artist_follow_interactions[followed]["Followed_By"].append(artist_id)
+
+    # Sonuçları JSON formatına dönüştür
     all_follow_interactions = []
-    for user_id, relations in follow_interactions.items():
+    for user_id, relations in user_follow_interactions.items():
         all_follow_interactions.append((
             user_id,
-            json.dumps(list(relations["Following"])),
-            json.dumps(list(relations["Followed_By"]))
+            json.dumps(relations["Following"]),
+            json.dumps(relations["Followed_By"])
+        ))
+
+    for artist_id, relations in artist_follow_interactions.items():
+        all_follow_interactions.append((
+            artist_id,
+            json.dumps(relations["Following"]),
+            json.dumps(relations["Followed_By"])
         ))
 
     return all_follow_interactions
+
+
+
+
 
 
 
@@ -263,7 +308,7 @@ user_interactions = generate_user_interactions(user_ids, track_data_duration)
 insert_user_interactions(user_interactions)
 
 # Kullanıcılar ve sanatçılar için takip ilişkisi oluşturma
-user_follow_interactions = generate_user_follow_interactions(user_ids)
+user_follow_interactions = generate_user_follow_interactions(user_ids, artist_ids)
 # Takip ilişkisini tabloya ekleme
 insert_user_follow_interactions(user_follow_interactions)
 
