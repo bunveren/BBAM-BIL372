@@ -55,9 +55,7 @@ def generate_users(num_users):
     users = []
     for i in range(num_users):
         username = f'user_{i + 1}_{random.randint(1000, 9999)}'  
-        username = f'user_{i + 1}_{random.randint(1000, 9999)}'  
         password = f'password_{i + 1}'
-        email = f'user_{i + 1}_{random.randint(1000, 9999)}@example.com'
         email = f'user_{i + 1}_{random.randint(1000, 9999)}@example.com'
         subscription_type = random.choice(['Free', 'Premium'])
         created_at = random_date(datetime(2020, 1, 1), datetime(2024, 11, 27)).strftime('%Y-%m-%d')
@@ -70,8 +68,6 @@ def generate_artists(num_artists):
     for name in selected_artists:
         biography = f"{name} is an internationally acclaimed artist."
         genre = random.choice(['Pop', 'Rock', 'Hip Hop', 'Jazz', 'Classical'])
-        # songs = random.sample(track_titles, random.randint(3, 7))
-        artists.append((name, biography, genre))
         # songs = random.sample(track_titles, random.randint(3, 7))
         artists.append((name, biography, genre))
     return artists
@@ -95,13 +91,8 @@ def generate_tracks(num_tracks, album_ids, album_artist_map, all_artist_ids):
         other_artist_ids = random.sample(all_artist_ids, random.randint(0, 3))
         if primary_artist_id not in other_artist_ids:
             other_artist_ids.append(primary_artist_id) 
-        primary_artist_id  = album_artist_map[album_id]
-        other_artist_ids = random.sample(all_artist_ids, random.randint(0, 3))
-        if primary_artist_id not in other_artist_ids:
-            other_artist_ids.append(primary_artist_id) 
         genre = random.choice(['Pop', 'Rock', 'Hip Hop', 'Jazz', 'Classical'])
         file_path = f'/tracks/{title.replace(" ", "_").lower()}.mp3'
-        artists_id = json.dumps(list(set(other_artist_ids)))  #json.dumps(random.sample(artist_ids, random.randint(1, 3)))
         artists_id = json.dumps(list(set(other_artist_ids)))  #json.dumps(random.sample(artist_ids, random.randint(1, 3)))
         play_count = random.randint(0, 10000)
         tracks.append((title, duration, album_id, genre, file_path, artists_id, play_count))
@@ -113,7 +104,6 @@ def generate_playlists(num_playlists, user_ids):
     for i, name in enumerate(selected_playlists):
         user_id = random.choice(user_ids)
         created_at = random_date(datetime(2020, 1, 1), datetime(2024, 11, 27)).strftime('%Y-%m-%d')
-        contained_items = json.dumps(random.sample(range(1, 100), 5))
         contained_items = json.dumps(random.sample(range(1, 100), 5))
         playlists.append((user_id, name, created_at, contained_items))
     return playlists
