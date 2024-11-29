@@ -86,7 +86,6 @@ def generate_albums(num_albums, artist_ids):
     return albums
 
 def generate_tracks(num_tracks, album_ids, album_artist_map, all_artist_ids):
-def generate_tracks(num_tracks, album_ids, album_artist_map, all_artist_ids):
     tracks = []
     selected_tracks = random.choices(track_titles, k=num_tracks)
     for i, title in enumerate(selected_tracks):
