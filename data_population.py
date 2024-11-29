@@ -131,16 +131,7 @@ def generate_user_interactions(user_ids, track_data):
             user_interactions.append((user_id, track_id, liked, timestamp))
     return user_interactions
 
-
-
-
-
-
-
 def generate_user_follow_interactions(user_ids):
-    """
-    Generates consistent Following and Followed_By relationships for users only.
-    """
     # Initialize relationships for all users
     follow_interactions = {user_id: {"Following": set(), "Followed_By": set()} for user_id in user_ids}
 
@@ -167,18 +158,12 @@ def generate_user_follow_interactions(user_ids):
 
     return all_follow_interactions
 
-
-
-
-
-
 def insert_users(users):
     query = "INSERT INTO Users (Username, Password, Email, Subscription_type, Created_at) VALUES (%s, %s, %s, %s, %s)"
     cursor.executemany(query, users)
     db.commit()
 
 def insert_artists(artists):
-    query = "INSERT INTO Artists (Name, Biography, Genre) VALUES (%s, %s, %s)"
     query = "INSERT INTO Artists (Name, Biography, Genre) VALUES (%s, %s, %s)"
     cursor.executemany(query, artists)
     db.commit()
@@ -209,16 +194,9 @@ def insert_user_interactions(user_interactions):
     db.commit()
     
 def insert_user_follow_interactions(user_follow_interactions):
-    """
-    User_Follow_Interactions tablosuna veri ekler.
-    """
-    query = """
-    INSERT INTO User_Follow_Interactions (User_ID, Following, Followed_By)
-    VALUES (%s, %s, %s)
-    """
+    query = "INSERT INTO User_Follow_Interactions (User_ID, Following, Followed_By) VALUES (%s, %s, %s)"
     cursor.executemany(query, user_follow_interactions)
     db.commit()
-
 
 # Veri üretimi ve ekleme
 users = generate_users(50)
