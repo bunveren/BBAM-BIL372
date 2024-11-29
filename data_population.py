@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="melis", 
-    database="bbam" #musicstreamingdb
+    password="aylin_shn_06?", 
+    database="musicstreamingdb" #musicstreamingdb
 )
 
 cursor = db.cursor()
@@ -98,12 +98,15 @@ def generate_tracks(num_tracks, album_ids, album_artist_map, all_artist_ids):
         tracks.append((title, duration, album_id, genre, file_path, artists_id, play_count))
     return tracks
 
-def generate_playlists(num_playlists, user_ids):
+def generate_playlists(num_playlists, users):
     playlists = []
     selected_playlists = random.sample(playlist_names, num_playlists)
     for i, name in enumerate(selected_playlists):
-        user_id = random.choice(user_ids)
-        created_at = random_date(datetime(2020, 1, 1), datetime(2024, 11, 27)).strftime('%Y-%m-%d')
+        user = random.choice(users)
+        user_id = users.index(user) + 1
+        user_created_at = datetime.strptime(user[4], '%Y-%m-%d')
+        today = datetime.now()
+        created_at = random_date(user_created_at, today).strftime('%Y-%m-%d')
         contained_items = json.dumps(random.sample(range(1, 100), 5))
         playlists.append((user_id, name, created_at, contained_items))
     return playlists
@@ -236,7 +239,7 @@ insert_tracks(tracks)
 cursor.execute("SELECT Track_ID FROM Tracks")
 track_ids = [row[0] for row in cursor.fetchall()]
 
-playlists = generate_playlists(30, user_ids)
+playlists = generate_playlists(30, users)
 insert_playlists(playlists)
 
 cursor.execute("SELECT Track_ID, Play_Count FROM Tracks")
