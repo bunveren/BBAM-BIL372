@@ -240,23 +240,8 @@ def artist_albums(request, artist_id):
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
-    # Playlists
 
-
-#todo bunları anlamadım
-"""
-/api/users/<int:user_id>/playlists/
-
-    GET: List all playlists of a user.
-    PUT: Add a new playlist for the user.
-    DELETE: Delete a user’s playlist.
-
-/api/users/<int:user_id>/playlists/<int:playlist_id>/
-
-    GET: Retrieve a specific playlist for a user.
-    POST: Update a playlist (e.g., tracks, name).
-"""
-
+ # Playlists
 
 @api_view(['GET', 'POST'])  # /api/playlists/users/{user_id}
 def all_user_playlists(request, user_id):
@@ -314,7 +299,7 @@ def user_interaction(request, user_id, track_id):
         serializer = UserInteractionsSerializer(interaction)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
+    elif request.method == 'POST':
         # Update the interaction
         serializer = UserInteractionsSerializer(interaction, data=request.data)
         if serializer.is_valid():
