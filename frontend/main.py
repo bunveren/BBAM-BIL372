@@ -130,7 +130,7 @@ class MainWindow(QMainWindow):
 
         self.stack = QStackedWidget()
 
-        user_id=1
+        user_id=11 # her userın playlisti olmayabilir
         self.start_screen = self.start_screen(user_id)
 
         self.playlist_screen = self.create_playlists_screen(user_id)
@@ -289,8 +289,8 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         basedir = (os.path.dirname(os.path.abspath(__file__)))
         playlist_data = api.get_user_playlists(user_id)
-
         for playlist in playlist_data:
+
             playlist_name = playlist["name"]
             playlist_created_at = playlist["created_at"]
             playlist_tracks = playlist["tracks"]
@@ -333,10 +333,7 @@ class MainWindow(QMainWindow):
         label = QLabel(title)
         label.setFont(QFont("Arial", 16))
         label.setAlignment(Qt.AlignCenter)
-
         list_widget = QListWidget()
-        list_widget.addItems(items)
-
         layout.addWidget(label)
         layout.addWidget(list_widget)
 
@@ -348,8 +345,9 @@ class MainWindow(QMainWindow):
                 track_duration = track["duration"]
                 track_genre = track["genre"]
                 track_artists = ""
-                for artist_id in track["artists"]:
-                    track_artists += api.get_artist(artist_id)["name"]+", "
+
+                for artist_id in track["artists_id"]:
+                    track_artists += api.get_artist(artist_id)['name']+", "
                 length = len(track_artists)
                 track_artists = track_artists[:length-2]
                 list_widget.addItem(track_title)
