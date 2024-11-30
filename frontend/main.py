@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtCore import Qt, QSize, QPropertyAnimation
 import os
+import api
 
 
 class MainWindow(QMainWindow):
@@ -129,25 +130,13 @@ class MainWindow(QMainWindow):
 
         self.stack = QStackedWidget()
 
-        following = ["User1", "User2", "User3"]
-        followed_by = ["UserA", "UserB", "UserC"]
+        user_id=1
+        self.start_screen = self.start_screen(user_id)
 
-        self.start_screen = self.start_screen(following,followed_by)
-
-        playlists_data = {
-            "Liste 1": ["Şarkı A", "Şarkı B", "Şarkı C"],
-            "Liste 2": ["Şarkı D", "Şarkı E", "Şarkı F"],
-            "Liste 3": ["Şarkı G", "Şarkı H", "Şarkı I"],
-            "Liste 4": ["Şarkı J", "Şarkı K", "Şarkı L"],
-        }
-
-        self.playlist_screen = self.create_playlists_screen(playlists_data)
+        self.playlist_screen = self.create_playlists_screen(user_id)
 
         artists_data = {
-            "Sanatçı 1": ["Şarkı A", "Şarkı B", "Şarkı C"],
-            "Sanatçı 2": ["Şarkı D", "Şarkı E", "Şarkı F"],
-            "Sanatçı 3": ["Şarkı G", "Şarkı H", "Şarkı I"],
-            "Sanatçı 4": ["Şarkı J", "Şarkı K", "Şarkı L"],
+            #tamamı
         }
 
         self.artist_screen = self.create_artist_screen(artists_data)
@@ -221,8 +210,8 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(continue_container)
         self.stack.setCurrentWidget(continue_container)
 
-    def start_screen(self, following, followed_by):
-        username = "Seda"
+    def start_screen(self, user_id):
+        username = api.get_user(user_id)['username'];
         username_label = QLabel(f"Tekrar hoş geldin {username}!")
         username_label.setStyleSheet("font-family: Arial; font-size: 35px; font-weight: bold;")
 
@@ -230,25 +219,25 @@ class MainWindow(QMainWindow):
         pixmap = QPixmap("resources/thispersondoesnotexist.jpg")
         profile_picture.setPixmap(pixmap.scaled(100, 100))
         basedir = (os.path.dirname(os.path.abspath(__file__)))
-
-        followers_num = len(following)
-        followed_by_num = len(followed_by)
-        followers_button = QPushButton(f"Takipçiler ({followers_num})")
-        following_button = QPushButton(f"Takip Edilenler ({followed_by_num})")
+        """
+        #followers_num = len(following)
+        #followed_by_num = len(followed_by)
+        #followers_button = QPushButton(f"Takipçiler ({followers_num})")
+        #following_button = QPushButton(f"Takip Edilenler ({followed_by_num})")
         followers_button.setIcon(QIcon(os.path.join(basedir, "resources", "follower-svgrepo-com.svg")))
         following_button.setIcon(QIcon(os.path.join(basedir, "resources", "following-svgrepo-com.svg")))
         followers_button.setFixedSize(170, 40)
         following_button.setFixedSize(170, 40)
         followers_button.setStyleSheet("text-align: left;")
         following_button.setStyleSheet("text-align: left;")
-
+        
         followers_button.clicked.connect(lambda: self.show_list_screen("Takipçiler", following, False, False, False))
         following_button.clicked.connect(lambda: self.show_list_screen("Takip Edilenler", followed_by, False, False, False))
-
+        """
         profile_layout = QHBoxLayout()
         profile_layout.addWidget(profile_picture)
-        profile_layout.addWidget(followers_button)
-        profile_layout.addWidget(following_button)
+        #profile_layout.addWidget(followers_button)
+        #profile_layout.addWidget(following_button)
         profile_layout.addStretch()
         profile_layout.setSpacing(10)
 
@@ -296,18 +285,24 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         return container
 
-    def create_playlists_screen(self, playlists_data):
+    def create_playlists_screen(self, user_id):
         layout = QVBoxLayout()
         basedir = (os.path.dirname(os.path.abspath(__file__)))
+        playlist_data = api.get_user_playlists(user_id)
 
-        for playlist, songs in playlists_data.items():
-            button = QPushButton(playlist)
+        for playlist in playlist_data:
+            playlist_name = playlist["name"]
+            playlist_created_at = playlist["created_at"]
+            playlist_tracks = playlist["tracks"]
+
+            button = QPushButton(playlist_name+" "+playlist_created_at)
             button.setIcon(QIcon(os.path.join(basedir, "resources", "music-player-svgrepo-com.svg")))
             button.setStyleSheet("text-align: left; width: 100%;")
 
-            button.clicked.connect(lambda _, a=playlist, s=songs: self.show_list_screen(a, s, True, False, False))
-            layout.addWidget(button)
+            button.setStyleSheet("text-align:")
+            button.clicked.connect(lambda _, a=playlist_name, s=playlist_tracks: self.show_list_screen(a, s, True, False, False))
 
+            layout.addWidget(button)
         layout.addStretch()
 
         home_button = QPushButton("Ana Sayfa")
@@ -346,11 +341,22 @@ class MainWindow(QMainWindow):
         layout.addWidget(list_widget)
 
         if is_song:
-            list_widget.itemClicked.connect(self.on_song_clicked)
+            #list_widget.itemClicked.connect(self.on_song_clicked)
+            for track_id in items:
+                track = api.get_track(track_id)
+                track_title = track["title"]
+                track_duration = track["duration"]
+                track_genre = track["genre"]
+                track_artists = ""
+                for artist_id in track["artists"]:
+                    track_artists += api.get_artist(artist_id)["name"]+", "
+                length = len(track_artists)
+                track_artists = track_artists[:length-2]
+                list_widget.addItem(track_title)
         if is_setting:
             list_widget.itemClicked.connect(self.start_screen)
         if is_artist:
-            list_widget.itemClicked.connect(self.on_person_clicked) #todo change
+            list_widget.itemClicked.connect(self.on_person_clicked) # todo change
         else:
             list_widget.itemClicked.connect(self.on_person_clicked)
 
@@ -393,18 +399,11 @@ class MainWindow(QMainWindow):
 
 # todo
 
-    def load_artists(self, item):
-        return
-
-    def load_followers(self, item):
-        return
-
-    def load_followed_by(self, item):
-        return
-
-
 if __name__ == "__main__":
     app = QApplication([])
     window = MainWindow()
     window.show()
     app.exec()
+
+    print(api.get_user(1))
+
