@@ -142,7 +142,7 @@ class UserFollowInteractions(models.Model):
 
     followed_by = models.JSONField(db_column='Followed_By')  # Field name made lowercase.
 
-    user = models.ForeignKey('Users', models.DO_NOTHING, db_column='User_ID')  # Field name made lowercase.
+    user_id = models.ForeignKey('Users', models.DO_NOTHING, db_column='User_ID', primary_key = True)  # Field name made lowercase.
 
 
 

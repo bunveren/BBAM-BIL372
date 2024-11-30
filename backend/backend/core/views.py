@@ -12,6 +12,17 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 
+def update_json_field(json_field, data, action):
+    if action == "add":
+        if data not in json_field:
+            json_field.append(data)
+    elif action == "remove":
+        if data in json_field:
+            json_field.remove(data)
+            print(json_field)
+    return json_field
+
+
 @api_view(['GET', 'POST'])
 def users_list(request):
     if request.method == 'GET':
@@ -50,64 +61,67 @@ def user_detail(request, user_id):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-#todo ask @betulls
-
 @api_view(['GET', 'PUT', 'DELETE'])
 def user_following(request, user_id):
-    try:
-        following = UserFollowInteractions.objects.values_list('following', flat=True).get(user_id=pk)
-    except UserFollowInteractions.DoesNotExist:
-        return Response({'error': 'User_Follow_Interactions not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    user_interaction = get_object_or_404(UserFollowInteractions, user_id=user_id)
 
     if request.method == 'GET':
-        return Response({'following': following}, status=status.HTTP_200_OK)
+        return Response(user_interaction.following, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        new_following = request.data.get('following', None)
-        if new_following is not None:
-            user_interaction.following = new_following
-            user_interaction.save()
-            return Response({'message': 'following updated successfully.'}, status=status.HTTP_200_OK)
-
-        return Response({'error': 'Invalid data provided.'}, status=status.HTTP_400_BAD_REQUEST)
+        new_following = request.data.get('User_ID')
+        if not new_following:
+            return Response({"error": "User_ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user_interaction.following = update_json_field(user_interaction.following, new_following, "add")
+        user_interaction.save()
+        return Response({"message": "Following added successfully"}, status=status.HTTP_200_OK)
 
     elif request.method == 'DELETE':
-        user_interaction.following.delete()
-        return Response({'message': 'User_Follow_Interactions:Following deleted successfully.'}, status=status.HTTP_200_OK)
+        following_to_remove = request.data.get('User_ID')
+        if not following_to_remove:
+            return Response({"error": "User_ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user_interaction.following = update_json_field(user_interaction.following, following_to_remove, "remove")
+        user_interaction.save()
+        return Response({"message": "Following removed successfully"}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def user_followed_by(request, user_id):
-    try:
-        followed_by = UserFollowInteractions.objects.values_list('followed_by', flat=True).get(user_id=pk)
-    except UserFollowInteractions.DoesNotExist:
-        return Response({'error': 'User_Follow_Interactions not found.'}, status=status.HTTP_404_NOT_FOUND)
+    user_interaction = get_object_or_404(UserFollowInteractions, user_id=user_id)
 
     if request.method == 'GET':
-        return Response({'followed_by': followed_by}, status=status.HTTP_200_OK)
+        return Response(user_interaction.followed_by, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        new_followed = request.data.get('followed_by', None)
-        if new_followed is not None:
-            user_interaction.followed_by = new_followed
-            user_interaction.save()
-            return Response({'message': 'Followed by updated successfully.'}, status=status.HTTP_200_OK)
-
-        return Response({'error': 'Invalid data provided.'}, status=status.HTTP_400_BAD_REQUEST)
+        new_follower = request.data.get('User_ID')
+        if not new_follower:
+            return Response({"error": "User_ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user_interaction.followed_by = update_json_field(user_interaction.followed_by, new_follower, "add")
+        user_interaction.save()
+        return Response({"message": "Follower added successfully"}, status=status.HTTP_200_OK)
 
     elif request.method == 'DELETE':
-        user_interaction.followed_by.delete()
-        return Response({'message': 'User_Follow_Interactions:Followed_by deleted successfully.'}, status=status.HTTP_200_OK)
+        follower_to_remove = request.data.get('User_ID')
+        if not follower_to_remove:
+            return Response({"error": "User_ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user_interaction.followed_by = update_json_field(user_interaction.followed_by, follower_to_remove, "remove")
+        user_interaction.save()
+        return Response({"message": "Follower removed successfully"}, status=status.HTTP_200_OK)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'PUT'])
 def artists_list(request):
     if request.method == 'GET':
         artists = Artists.objects.all()
         serializer = ArtistsSerializer(artists, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
+    elif request.method == 'PUT':
         serializer = ArtistsSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -115,7 +129,7 @@ def artists_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'POST', 'DELETE'])
 def artist_detail(request, artist_id):
     try:
         artist = Artists.objects.get(artist_id=artist_id)
@@ -126,7 +140,7 @@ def artist_detail(request, artist_id):
         serializer = ArtistsSerializer(artist)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
+    elif request.method == 'POST':
         serializer = ArtistsSerializer(artist, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -138,14 +152,14 @@ def artist_detail(request, artist_id):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'PUT'])
 def tracks_list(request):
     if request.method == 'GET':
         tracks = Tracks.objects.all()
         serializer = TracksSerializer(tracks, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
+    elif request.method == 'PUT':
         serializer = TracksSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -153,7 +167,7 @@ def tracks_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'POST', 'DELETE'])
 def track_detail(request, track_id):
     try:
         track = Tracks.objects.get(track_id=track_id)
@@ -164,7 +178,7 @@ def track_detail(request, track_id):
         serializer = TracksSerializer(track)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
+    elif request.method == 'POST':
         serializer = TracksSerializer(track, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -177,14 +191,14 @@ def track_detail(request, track_id):
 
 # Albums
 
-@api_view(['GET', 'POST'])  # /api/albums
+@api_view(['GET', 'PUT'])  # /api/albums
 def all_albums(request):
     if request.method == 'GET':
         albums = Albums.objects.all()
         serializer = AlbumsSerializer(albums, many=True)
         return Response(serializer.data, status=200)
 
-    elif request.method == 'POST':
+    elif request.method == 'PUT':
         serializer = AlbumsSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -192,7 +206,7 @@ def all_albums(request):
         return Response(serializer.errors, status=400)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])  # /api/albums/{album_id}
+@api_view(['GET', 'POST', 'DELETE'])  # /api/albums/{album_id}
 def album_detail(request, album_id):
     try:
         album = Albums.objects.get(album_id=album_id)
@@ -203,7 +217,7 @@ def album_detail(request, album_id):
         serializer = AlbumsSerializer(album)
         return Response(serializer.data, status=200)
 
-    elif request.method == 'PUT':
+    elif request.method == 'POST':
         serializer = AlbumsSerializer(album, data=request.data)
         if serializer.is_valid():
             serializer.save()

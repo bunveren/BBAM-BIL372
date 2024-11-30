@@ -25,7 +25,7 @@ urlpatterns = [
     path('api/users/<int:user_id>/', views.user_detail, name='user_detail'),
 
     path('api/user_following/<int:user_id>/', views.user_following, name='user_following'),
-    path('api/user_followed/<int:user_id>/', views.user_followed_by, name='user_followed_by'),
+    path('api/user_followed_by/<int:user_id>/', views.user_followed_by, name='user_followed_by'),
 
     path('api/artists/', views.artists_list, name='artists_list'),
     path('api/artists/<int:artist_id>/', views.artist_detail, name='artist_detail'),
