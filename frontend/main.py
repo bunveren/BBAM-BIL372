@@ -76,7 +76,6 @@ class MainWindow(QMainWindow):
 
     def create_login_screen(self):
         login_layout = QVBoxLayout()
-
         login_label = QLabel("Hoş geldiniz! Lütfen giriş yapın.")
         login_label.setAlignment(Qt.AlignCenter)
         login_label.setStyleSheet("font-size: 18px; font-weight: bold;")
@@ -392,7 +391,6 @@ class MainWindow(QMainWindow):
             button = QPushButton(playlist_name + " / " + playlist_created_at)
             button.setIcon(QIcon(os.path.join(basedir, "resources", "music-player-svgrepo-com.svg")))
             button.setStyleSheet("text-align: left; width: 100%;")
-
             button.setStyleSheet("text-align:")
             button.clicked.connect(
                 lambda _, a=playlist_name, s=playlist_tracks: self.show_list_screen(a, s, True, False, False))
@@ -449,7 +447,7 @@ class MainWindow(QMainWindow):
             "playlist_id": 0,
             "name": playlist_name_input.text(),
             "created_at": datetime.now().strftime("%Y-%m-%d"),
-            "tracks": [68, 96, 60, 47, 55],
+            "tracks": [],
             "user": self._user_id
         }
         result = api.create_user_playlist(self._user_id, playlist_data)
@@ -477,10 +475,9 @@ class MainWindow(QMainWindow):
         list_widget = QListWidget()
         layout.addWidget(label)
         layout.addWidget(list_widget)
-
+        print(items)
         if is_song:
-            # list_widget.itemClicked.connect(self.on_song_clicked)
-            if not items["error"]:
+            if items:
                 for track_id in items:
                     track = api.get_track(track_id)
                     track_title = track["title"]
@@ -493,6 +490,8 @@ class MainWindow(QMainWindow):
                     length = len(track_artists)
                     track_artists = track_artists[:length - 2]
                     list_widget.addItem(track_title)
+            else:
+                layout.addWidget(QLabel("Playlist'iniz boş."))
         if is_setting:
             list_widget.itemClicked.connect(self.start_screen_func(self._user_id))
         if is_artist:
