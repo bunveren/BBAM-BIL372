@@ -12,13 +12,67 @@ from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtCore import Qt, QSize, QPropertyAnimation
 import os
 
-from django.core.serializers import json
-
 import api
 
 
 class MainWindow(QMainWindow):
     _user_id = -1
+    start_screen = None
+
+    def start_screen_func(self, user_id):
+        username = api.get_user(user_id)['username']
+        username_label = QLabel(f"Tekrar hoş geldin {username}!")
+        username_label.setStyleSheet("font-family: Arial; font-size: 35px; font-weight: bold;")
+
+        profile_picture = QLabel()
+        pixmap = QPixmap("resources/thispersondoesnotexist.jpg")
+        profile_picture.setPixmap(pixmap.scaled(100, 100))
+        basedir = (os.path.dirname(os.path.abspath(__file__)))
+        """
+        #followers_num = len(following)
+        #followed_by_num = len(followed_by)
+        #followers_button = QPushButton(f"Takipçiler ({followers_num})")
+        #following_button = QPushButton(f"Takip Edilenler ({followed_by_num})")
+        followers_button.setIcon(QIcon(os.path.join(basedir, "resources", "follower-svgrepo-com.svg")))
+        following_button.setIcon(QIcon(os.path.join(basedir, "resources", "following-svgrepo-com.svg")))
+        followers_button.setFixedSize(170, 40)
+        following_button.setFixedSize(170, 40)
+        followers_button.setStyleSheet("text-align: left;")
+        following_button.setStyleSheet("text-align: left;")
+
+        followers_button.clicked.connect(lambda: self.show_list_screen("Takipçiler", following, False, False, False))
+        following_button.clicked.connect(lambda: 
+        self.show_list_screen("Takip Edilenler", followed_by, False, False, False))
+        """
+        profile_layout = QHBoxLayout()
+        profile_layout.addWidget(profile_picture)
+        # profile_layout.addWidget(followers_button)
+        # profile_layout.addWidget(following_button)
+        profile_layout.addStretch()
+        profile_layout.setSpacing(10)
+
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(username_label)
+        main_layout.addLayout(profile_layout)
+        main_layout.addStretch()
+
+        continue_label = QLabel("Kaldığın yerden devam et...")
+        continue_label.setStyleSheet("font-size: 18px; color: gray; text-align: center;")
+        continue_button = QPushButton("Devam Et")
+        continue_button.setFixedSize(170, 40)
+        continue_button.clicked.connect(lambda: self.show_recent_screen())
+
+        continue_layout = QHBoxLayout()
+        continue_layout.addWidget(continue_label)
+        continue_layout.addWidget(continue_button)
+        continue_layout.setSpacing(10)
+
+        main_layout.addLayout(continue_layout)
+
+        container = QWidget()
+        container.setLayout(main_layout)
+        self.start_screen = container
+        self.stack.setCurrentWidget(container)
 
     def create_login_screen(self):
         login_layout = QVBoxLayout()
@@ -70,7 +124,6 @@ class MainWindow(QMainWindow):
         def validate_login():
             username = username_input.text()
             password = password_input.text()
-            user_id = 0
             is_valid = self.check_credentials(username, password)
             if is_valid != -1:
                 self.create_after_login(is_valid)
@@ -132,7 +185,7 @@ class MainWindow(QMainWindow):
 
         self.stack = QStackedWidget()
 
-        self.start_screen = self.start_screen(user_id)
+        self.start_screen_func(user_id)
 
         self.playlist_screen = self.create_playlists_screen(user_id)
 
@@ -162,7 +215,7 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-        self.profile_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        self.profile_button.clicked.connect(lambda: self.start_screen_func(self._user_id))
         self.playlist_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.playlist_screen))
         self.artist_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.artist_screen))
         self.search_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.search_screen))
@@ -263,7 +316,7 @@ class MainWindow(QMainWindow):
         layout.addStretch()
 
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        home_button.clicked.connect(lambda: self.self.create_after_login(self._user_id))
         layout.addWidget(home_button)
 
         container = QWidget()
@@ -277,70 +330,17 @@ class MainWindow(QMainWindow):
         new_screen_label.setAlignment(Qt.AlignCenter)
         new_screen_label.setFont(QFont("Arial", 18))
 
-        back_button = QPushButton("Ana Sayfa")
-        back_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        home_button = QPushButton("Ana Sayfa")
+        home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
 
         layout.addWidget(new_screen_label)
-        layout.addWidget(back_button)
+        layout.addWidget(home_button)
 
         continue_container = QWidget()
         continue_container.setLayout(layout)
 
         self.stack.addWidget(continue_container)
         self.stack.setCurrentWidget(continue_container)
-
-    def start_screen(self, user_id):
-        username = api.get_user(user_id)['username'];
-        username_label = QLabel(f"Tekrar hoş geldin {username}!")
-        username_label.setStyleSheet("font-family: Arial; font-size: 35px; font-weight: bold;")
-
-        profile_picture = QLabel()
-        pixmap = QPixmap("resources/thispersondoesnotexist.jpg")
-        profile_picture.setPixmap(pixmap.scaled(100, 100))
-        basedir = (os.path.dirname(os.path.abspath(__file__)))
-        """
-        #followers_num = len(following)
-        #followed_by_num = len(followed_by)
-        #followers_button = QPushButton(f"Takipçiler ({followers_num})")
-        #following_button = QPushButton(f"Takip Edilenler ({followed_by_num})")
-        followers_button.setIcon(QIcon(os.path.join(basedir, "resources", "follower-svgrepo-com.svg")))
-        following_button.setIcon(QIcon(os.path.join(basedir, "resources", "following-svgrepo-com.svg")))
-        followers_button.setFixedSize(170, 40)
-        following_button.setFixedSize(170, 40)
-        followers_button.setStyleSheet("text-align: left;")
-        following_button.setStyleSheet("text-align: left;")
-
-        followers_button.clicked.connect(lambda: self.show_list_screen("Takipçiler", following, False, False, False))
-        following_button.clicked.connect(lambda: self.show_list_screen("Takip Edilenler", followed_by, False, False, False))
-        """
-        profile_layout = QHBoxLayout()
-        profile_layout.addWidget(profile_picture)
-        # profile_layout.addWidget(followers_button)
-        # profile_layout.addWidget(following_button)
-        profile_layout.addStretch()
-        profile_layout.setSpacing(10)
-
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(username_label)
-        main_layout.addLayout(profile_layout)
-        main_layout.addStretch()
-
-        continue_label = QLabel("Kaldığın yerden devam et...")
-        continue_label.setStyleSheet("font-size: 18px; color: gray; text-align: center;")
-        continue_button = QPushButton("Devam Et")
-        continue_button.setFixedSize(170, 40)
-        continue_button.clicked.connect(lambda: self.show_recent_screen())
-
-        continue_layout = QHBoxLayout()
-        continue_layout.addWidget(continue_label)
-        continue_layout.addWidget(continue_button)
-        continue_layout.setSpacing(10)
-
-        main_layout.addLayout(continue_layout)
-
-        container = QWidget()
-        container.setLayout(main_layout)
-        return container
 
     def create_artist_screen(self, artist_data):
         layout = QVBoxLayout()
@@ -357,7 +357,7 @@ class MainWindow(QMainWindow):
         layout.addStretch()
 
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
 
         container = QWidget()
@@ -368,7 +368,7 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         basedir = (os.path.dirname(os.path.abspath(__file__)))
         playlist_data = api.get_user_playlists(user_id)
-        if type(playlist_data) == dict: #
+        if type(playlist_data) is dict:
             label = QLabel("Henüz bir playlist oluşturulmamış. Eklemek ister misiniz?")
             layout.addWidget(label)
             create_playlist_button = QPushButton("Yeni Playlist")
@@ -377,7 +377,7 @@ class MainWindow(QMainWindow):
             layout.addStretch()
 
             home_button = QPushButton("Ana Sayfa")
-            home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+            home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
             layout.addWidget(home_button)
 
             container = QWidget()
@@ -389,7 +389,7 @@ class MainWindow(QMainWindow):
             playlist_created_at = playlist["created_at"]
             playlist_tracks = playlist["tracks"]
 
-            button = QPushButton(playlist_name + " " + playlist_created_at)
+            button = QPushButton(playlist_name + " / " + playlist_created_at)
             button.setIcon(QIcon(os.path.join(basedir, "resources", "music-player-svgrepo-com.svg")))
             button.setStyleSheet("text-align: left; width: 100%;")
 
@@ -399,9 +399,11 @@ class MainWindow(QMainWindow):
 
             layout.addWidget(button)
         layout.addStretch()
-
+        create_playlist_button = QPushButton("Yeni Playlist")
+        create_playlist_button.clicked.connect(self.new_playlist_screen)
+        layout.addWidget(create_playlist_button)
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        home_button.clicked.connect(lambda: self.create_playlists_screen(self._user_id))
         layout.addWidget(home_button)
 
         container = QWidget()
@@ -429,12 +431,16 @@ class MainWindow(QMainWindow):
         layout.addWidget(add_playlist_button)
         layout.addStretch()
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
         container.setLayout(layout)
         self.stack.addWidget(container)
         self.stack.setCurrentWidget(container)
-        add_playlist_button.clicked.connect(lambda: self.create_playlist(playlist_name_input))
+        add_playlist_button.clicked.connect(lambda: (
+            self.create_playlist(playlist_name_input),
+            self.create_after_login(self._user_id)
+        ))
+
     def create_playlist(self, playlist_name_input):
         if not playlist_name_input.text():
             QMessageBox.warning(self, "Uyarı", "Lütfen bir playlist adı girin!")
@@ -442,7 +448,7 @@ class MainWindow(QMainWindow):
         playlist_data = {
             "playlist_id": 0,
             "name": playlist_name_input.text(),
-            "created_at": "2023-05-03",
+            "created_at": datetime.now().strftime("%Y-%m-%d"),
             "tracks": [68, 96, 60, 47, 55],
             "user": self._user_id
         }
@@ -457,7 +463,7 @@ class MainWindow(QMainWindow):
 
         layout.addWidget(search_label)
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
         container = QWidget()
         container.setLayout(layout)
@@ -488,14 +494,14 @@ class MainWindow(QMainWindow):
                     track_artists = track_artists[:length - 2]
                     list_widget.addItem(track_title)
         if is_setting:
-            list_widget.itemClicked.connect(self.start_screen)
+            list_widget.itemClicked.connect(self.start_screen_func(self._user_id))
         if is_artist:
             list_widget.itemClicked.connect(self.on_person_clicked)  # todo change
         else:
             list_widget.itemClicked.connect(self.on_person_clicked)
 
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
 
         container = QWidget()
@@ -511,7 +517,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(label)
         layout.addStretch()
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
         container.setLayout(layout)
         self.stack.addWidget(container)
@@ -525,7 +531,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(label)
         layout.addStretch()
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
         container.setLayout(layout)
         self.stack.addWidget(container)
@@ -541,4 +547,3 @@ if __name__ == "__main__":
     app.exec()
 
     print(api.get_user(1))
-

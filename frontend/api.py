@@ -125,7 +125,7 @@ def get_albums():
 
 # PUT (create) an album
 def create_album(album_data):
-    response = requests.put(f"{BASE_URL}/albums/", json=album_data)
+    response = requests.put(f"{BASE_URL}albums/", json=album_data)
     if response.status_code == 200:
         return response.json()
     else:
@@ -140,14 +140,14 @@ def get_artist_albums(artist_id):
 
 # POST (update) an album
 def update_album_detail(album_id, album_data):
-    response = requests.post(f"{BASE_URL}/albums/{album_id}/", json=album_data)
+    response = requests.post(f"{BASE_URL}albums/{album_id}/", json=album_data)
     if response.status_code == 200:
         return response.json()
     return {"error": "Unable to update album"}
 
 # DELETE (remove) an album
 def delete_album(album_id):
-    response = requests.delete(f"{BASE_URL}/albums/{album_id}/")
+    response = requests.delete(f"{BASE_URL}albums/{album_id}/")
     if response.status_code == 204:
         return response.json()
     else:
@@ -155,7 +155,7 @@ def delete_album(album_id):
 
 # GET all albums of an artist
 def get_artist_albums(artist_id):
-    response = requests.get(f"{BASE_URL}/albums/artists/{artist_id}/")
+    response = requests.get(f"{BASE_URL}albums/artists/{artist_id}/")
     if response.status_code == 200:
         return response.json()
     return {"error": "Unable to fetch albums of the artist"}
@@ -169,7 +169,7 @@ def get_tracks():
 
 # PUT (add) a track
 def create_track(track_data):
-    response = requests.put(f"{BASE_URL}/tracks/", json=track_data)
+    response = requests.put(f"{BASE_URL}tracks/", json=track_data)
     if response.status_code == 201:
         return response.json()
     else:
@@ -184,14 +184,14 @@ def get_track(track_id):
 
 # POST (update) a track
 def update_track(track_id, track_data):
-    response = requests.post(f"{BASE_URL}/tracks/{track_id}/", json=track_data)
+    response = requests.post(f"{BASE_URL}tracks/{track_id}/", json=track_data)
     if response.status_code == 200:
         return response.json()
     return {"error": "Unable to update found"}
 
 # DELETE (remove) a track
 def delete_track(track_id):
-    response = requests.delete(f"{BASE_URL}/tracks/{track_id}/")
+    response = requests.delete(f"{BASE_URL}tracks/{track_id}/")
     if response.status_code == 204:
         return response.json()
     else:
@@ -206,14 +206,14 @@ def get_user_playlists(user_id):
 
 # POST (create) a new playlist for user
 def create_user_playlist(user_id, playlist_data):
-    response = requests.post(f"{BASE_URL}/playlists/users/{user_id}/", json=playlist_data)
-    if response.status_code == 200:
+    response = requests.post(f"{BASE_URL}playlists/users/{user_id}/", json=playlist_data)
+    if response.status_code in [200, 201]:
         return response.json()
     return {"error": "Unable to add playlist"}
 
 # GET playlist details of a user
 def get_playlist_detail(user_id, playlist_id):
-    response = requests.get(f"{BASE_URL}/playlists/users/{user_id}/{playlist_id}/")
+    response = requests.get(f"{BASE_URL}playlists/users/{user_id}/{playlist_id}/")
     if response.status_code == 200:
         return response.json()
     return {"error": "Unable to get playlist details"}
@@ -227,7 +227,7 @@ def create_playlist(user_id, playlist_id, playlist_data):
 
 # DELETE a playlist of a user
 def delete_playlist(user_id, playlist_id):
-    response = requests.delete(f"{BASE_URL}/playlists/users/{user_id}/{playlist_id}/")
+    response = requests.delete(f"{BASE_URL}playlists/users/{user_id}/{playlist_id}/")
     if response.status_code == 204:
         return response.json()
     else:
@@ -235,21 +235,21 @@ def delete_playlist(user_id, playlist_id):
 
 # GET user interactions
 def get_user_interaction(user_id, track_id):
-    response = requests.get(f"{BASE_URL}/user_interactions/{user_id}/{track_id}/")
+    response = requests.get(f"{BASE_URL}user_interactions/{user_id}/{track_id}/")
     if response.status_code == 200:
         return response.json()
     return {"error": "Unable to get user interactions"}
 
 # POST (update) user interaction
 def update_user_interaction(user_id, track_id, interaction_data):
-    response = requests.post(f"{BASE_URL}/user_interactions/{user_id}/{track_id}/", json=interaction_data)
+    response = requests.post(f"{BASE_URL}user_interactions/{user_id}/{track_id}/", json=interaction_data)
     if response.status_code == 200:
         return response.json()
     return {"error": "Unable to update user interaction"}
 
 # DELETE user interaction
 def delete_user_interaction(user_id, track_id):
-    response = requests.delete(f"{BASE_URL}/user_interactions/{user_id}/{track_id}/")
+    response = requests.delete(f"{BASE_URL}user_interactions/{user_id}/{track_id}/")
     if response.status_code == 204:
         return response.json()
     else:
