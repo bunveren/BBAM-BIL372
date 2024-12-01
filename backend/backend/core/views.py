@@ -317,17 +317,15 @@ def user_interaction(request, user_id, track_id):
 @api_view(['GET', 'POST', 'DELETE'])  # /api/recently_listened/{user_id}/{track_id}
 def recently_listened(request, user_id):
     try:
-        recently_listened_entry = RecentlyListened.objects.get(user_id=user_id)
+        recently_listened_entry = RecentlyListened.objects.filter(user_id=user_id)
     except RecentlyListened.DoesNotExist:
         return Response({"error": "Recently listened entry not found"}, status=404)
 
     if request.method == 'GET':
-        # Retrieve the recently listened entry
-        serializer = RecentlyListenedSerializer(recently_listened_entry)
+        serializer = RecentlyListenedSerializer(recently_listened_entry, many=True)
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        # Update or add the recently listened entry (e.g., play count or timestamp)
         serializer = RecentlyListenedSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -335,6 +333,8 @@ def recently_listened(request, user_id):
         return Response(serializer.errors, status=400)
 
     elif request.method == 'DELETE':
-        # Delete the recently listened entry
-        recently_listened_entry.delete()
-        return Response({"message": "Recently listened entry deleted successfully"}, status=204)
+        if request.data["track"]:
+            entry = RecentlyListened.objects.get(user_id=user_id, track_id=request.data["track"])
+            entry.delete()
+            return JsonResponse({"message": "Recently Listened Entry deleted successfully"}, status=204)
+        return Response({"message": "Recently listened entry could not be deleted"}, status=204)
