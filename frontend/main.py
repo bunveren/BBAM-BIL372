@@ -451,7 +451,6 @@ class MainWindow(QMainWindow):
             "user": self._user_id
         }
         result = api.create_user_playlist(self._user_id, playlist_data)
-        print(f"API Response: {result}")
 
     def create_search_screen(self):
         layout = QVBoxLayout()
@@ -475,7 +474,6 @@ class MainWindow(QMainWindow):
         list_widget = QListWidget()
         layout.addWidget(label)
         layout.addWidget(list_widget)
-        print(items)
         if is_song:
             if items:
                 for track_id in items:
@@ -544,5 +542,3 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     app.exec()
-
-    print(api.get_user(1))
