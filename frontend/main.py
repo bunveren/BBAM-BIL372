@@ -24,9 +24,6 @@ class MainWindow(QMainWindow):
         username_label = QLabel(f"Tekrar hoş geldin {username}!")
         username_label.setStyleSheet("font-family: Arial; font-size: 35px; font-weight: bold;")
 
-        profile_picture = QLabel()
-        pixmap = QPixmap("resources/thispersondoesnotexist.jpg")
-        profile_picture.setPixmap(pixmap.scaled(100, 100))
         basedir = (os.path.dirname(os.path.abspath(__file__)))
         """
         #followers_num = len(following)
@@ -45,7 +42,9 @@ class MainWindow(QMainWindow):
         self.show_list_screen("Takip Edilenler", followed_by, False, False, False))
         """
         profile_layout = QHBoxLayout()
-        profile_layout.addWidget(profile_picture)
+        profile_details = api.get_user(self._user_id)
+        profile_details_text = "E-mail: "+profile_details["email"]+"\n"+"Abonelik türü: "+profile_details["subscription_type"]+"\n"+"Hesap oluşturma tarihi "+profile_details["created_at"]
+        profile_layout.addWidget(QLabel(profile_details_text))
         # profile_layout.addWidget(followers_button)
         # profile_layout.addWidget(following_button)
         profile_layout.addStretch()
@@ -76,11 +75,17 @@ class MainWindow(QMainWindow):
 
     def create_login_screen(self):
         login_layout = QVBoxLayout()
+
         login_label = QLabel("Hoş geldiniz! Lütfen giriş yapın.")
         login_label.setAlignment(Qt.AlignCenter)
-        login_label.setStyleSheet("font-size: 18px; font-weight: bold;")
+        login_label.setStyleSheet("""
+            padding: 10px;
+            font-size: 18px;
+            margin-bottom: 10px;""")
         login_layout.addStretch()
         login_layout.addWidget(login_label)
+
+        # Username input
         username_input = QLineEdit()
         username_input.setPlaceholderText("Kullanıcı Adı")
         username_input.setFixedWidth(200)
@@ -93,6 +98,7 @@ class MainWindow(QMainWindow):
         """)
         login_layout.addWidget(username_input, alignment=Qt.AlignHCenter)
 
+        # Password input
         password_input = QLineEdit()
         password_input.setPlaceholderText("Şifre")
         password_input.setEchoMode(QLineEdit.Password)
@@ -105,17 +111,28 @@ class MainWindow(QMainWindow):
             margin-bottom: 10px;
         """)
         login_layout.addWidget(password_input, alignment=Qt.AlignHCenter)
-        login_layout.addStretch()
+
+        # Error label
         error_label = QLabel("")
         error_label.setStyleSheet("color: red; font-size: 12px;")
         error_label.setAlignment(Qt.AlignCenter)
         error_label.hide()
         login_layout.addWidget(error_label)
 
-        login_button = QPushButton("Login")
+        # Login button with a HBox layout to align it with inputs
+        button_layout = QHBoxLayout()
+        login_button = QPushButton("Giriş Yap")
         login_button.setStyleSheet("background-color: #1DB954; color: white; padding: 10px;")
-        login_layout.addWidget(login_button)
+        login_button.setFixedWidth(200)
+        button_layout.addWidget(login_button)
+        button_layout.setAlignment(Qt.AlignHCenter)
 
+        # Add the button layout to the main login layout
+        login_layout.addLayout(button_layout)
+
+        login_layout.addStretch()
+
+        # Set up the final login widget
         login_widget = QWidget()
         login_widget.setLayout(login_layout)
         self.setCentralWidget(login_widget)
@@ -127,7 +144,7 @@ class MainWindow(QMainWindow):
             if is_valid != -1:
                 self.create_after_login(is_valid)
             else:
-                error_label.setText("Invalid username or password. Please try again.")
+                error_label.setText("Yanlış username veya password. Tekrar deneyin.")
                 error_label.show()
 
         login_button.clicked.connect(validate_login)
@@ -222,7 +239,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("spotify çakması ui")
+        self.setWindowTitle("BBAM Music Player")
         self.setGeometry(100, 100, 1024, 768)
         self.font = QFont("Arial", 12, QFont.Normal)
 
