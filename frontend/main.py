@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QLabel, QWidget, QListWidget, QStackedWidget,
     QSplitter, QLineEdit, QMessageBox
 )
-from PyQt5.QtGui import QFont, QIcon, QPixmap
+from PyQt5.QtGui import QFont, QIcon, QPixmap, QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt, QSize, QPropertyAnimation
 import os
 
@@ -231,7 +231,7 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-        self.profile_button.clicked.connect(lambda: self.start_screen_func(self._user_id))
+        self.profile_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         self.playlist_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.playlist_screen))
         self.artist_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.artist_screen))
         self.search_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.search_screen))
@@ -342,14 +342,12 @@ class MainWindow(QMainWindow):
     def show_recent_screen(self):
         layout = QVBoxLayout()
 
-        new_screen_label = QLabel("Yakın zamanda dinlenenler burada görünecek.")
-        new_screen_label.setAlignment(Qt.AlignCenter)
-        new_screen_label.setFont(QFont("Arial", 18))
-
+        recently = api.get_recently_listened(self._user_id)
+        print(recently)
+        layout.addStretch()
         home_button = QPushButton("Ana Sayfa")
         home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
 
-        layout.addWidget(new_screen_label)
         layout.addWidget(home_button)
 
         continue_container = QWidget()
@@ -399,7 +397,6 @@ class MainWindow(QMainWindow):
             container = QWidget()
             container.setLayout(layout)
             return container
-
         for playlist in playlist_data:
             playlist_name = playlist["name"]
             playlist_created_at = playlist["created_at"]
@@ -413,10 +410,18 @@ class MainWindow(QMainWindow):
                 lambda _, a=playlist_name, s=playlist_tracks: self.show_list_screen(a, s, True, False, False))
 
             layout.addWidget(button)
+
+        #layout.addWidget(model)
         layout.addStretch()
+        pl_s_buttons = QHBoxLayout()
         create_playlist_button = QPushButton("Yeni Playlist")
         create_playlist_button.clicked.connect(self.new_playlist_screen)
-        layout.addWidget(create_playlist_button)
+        delete_playlist_button = QPushButton("Seçilen Playlist'i Sil")
+        delete_playlist_button.clicked.connect(self.new_playlist_screen)
+        pl_s_buttons.addWidget(create_playlist_button)
+        pl_s_buttons.addWidget(delete_playlist_button)
+        layout.addLayout(pl_s_buttons)
+
         home_button = QPushButton("Ana Sayfa")
         home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
@@ -455,6 +460,10 @@ class MainWindow(QMainWindow):
             self.create_playlist(playlist_name_input),
             self.create_after_login(self._user_id)
         ))
+
+
+
+
 
     def create_playlist(self, playlist_name_input):
         if not playlist_name_input.text():
@@ -511,28 +520,12 @@ class MainWindow(QMainWindow):
             list_widget.itemClicked.connect(self.start_screen_func(self._user_id))
         if is_artist:
             list_widget.itemClicked.connect(self.on_person_clicked)  # todo change
-        else:
-            list_widget.itemClicked.connect(self.on_person_clicked)
 
         home_button = QPushButton("Ana Sayfa")
         home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
 
         container = QWidget()
-        container.setLayout(layout)
-        self.stack.addWidget(container)
-        self.stack.setCurrentWidget(container)
-
-    def on_song_clicked(self, item):
-        text = item.text()
-        container = QWidget()
-        label = QLabel(f"'{text}' için şarkılar burada görünecek.")
-        layout = QVBoxLayout()
-        layout.addWidget(label)
-        layout.addStretch()
-        home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
-        layout.addWidget(home_button)
         container.setLayout(layout)
         self.stack.addWidget(container)
         self.stack.setCurrentWidget(container)
@@ -550,9 +543,6 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.stack.addWidget(container)
         self.stack.setCurrentWidget(container)
-
-
-# todo
 
 if __name__ == "__main__":
     app = QApplication([])
