@@ -332,7 +332,7 @@ class MainWindow(QMainWindow):
         layout.addStretch()
 
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.self.create_after_login(self._user_id))
+        home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
 
         container = QWidget()
@@ -418,7 +418,7 @@ class MainWindow(QMainWindow):
         create_playlist_button.clicked.connect(self.new_playlist_screen)
         layout.addWidget(create_playlist_button)
         home_button = QPushButton("Ana Sayfa")
-        home_button.clicked.connect(lambda: self.create_playlists_screen(self._user_id))
+        home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
 
         container = QWidget()
