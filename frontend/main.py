@@ -1,6 +1,7 @@
 # import backend.core.views
 # todo add play-pause buttons for visual
 # todo make search tab useful????
+from datetime import datetime
 
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton,
@@ -86,7 +87,7 @@ class MainWindow(QMainWindow):
         return -1
 
     def create_after_login(self, user_id):
-        _user_id = user_id  # for future use
+        self._user_id = user_id  # for future use
         self.main_splitter = QSplitter(Qt.Horizontal)
 
         menu_layout = QVBoxLayout()
@@ -364,6 +365,22 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         basedir = (os.path.dirname(os.path.abspath(__file__)))
         playlist_data = api.get_user_playlists(user_id)
+        if playlist_data["error"]:
+            label = QLabel("Henüz bir playlist oluşturulmamış. Eklemek ister misiniz?")
+            layout.addWidget(label)
+            create_playlist_button = QPushButton("Yeni Playlist")
+            create_playlist_button.clicked.connect(self.new_playlist_screen)
+            layout.addWidget(create_playlist_button)
+            layout.addStretch()
+
+            home_button = QPushButton("Ana Sayfa")
+            home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+            layout.addWidget(home_button)
+
+            container = QWidget()
+            container.setLayout(layout)
+            return container
+
         for playlist in playlist_data:
             playlist_name = playlist["name"]
             playlist_created_at = playlist["created_at"]
@@ -388,6 +405,46 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         return container
 
+    def new_playlist_screen(self):
+        playlist_name_input = QLineEdit()
+        playlist_name_input.setPlaceholderText("Kullanıcı Adı")
+        playlist_name_input.setFixedWidth(200)
+        playlist_name_input.setStyleSheet("""
+                    padding: 10px;
+                    font-size: 14px;
+                    border: 2px solid #ccc;
+                    border-radius: 8px;
+                    margin-bottom: 10px;
+                """)
+
+        container = QWidget()
+        label = QLabel(f"Playlist'inize bir isim verin:")
+        layout = QVBoxLayout()
+        layout.addWidget(playlist_name_input, alignment=Qt.AlignHCenter)
+        layout.addWidget(label)
+        layout.addStretch()
+        add_playlist_button = QPushButton("Playlist'i Oluştur")
+
+        home_button = QPushButton("Ana Sayfa")
+        home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
+        layout.addWidget(home_button)
+        container.setLayout(layout)
+        self.stack.addWidget(container)
+        self.stack.setCurrentWidget(container)
+
+        playlist_data = [
+            {
+                "playlist_id": 0,
+                "name": playlist_name_input.text(),
+                "created_at": datetime.now().strftime("%Y-%m-%d"),
+                "tracks": [],
+                "user": self._user_id
+            }
+        ]
+
+        add_playlist_button.clicked.connect(api.create_user_playlist(self._user_id, playlist_data))
+
+
     def create_search_screen(self):
         layout = QVBoxLayout()
         search_label = QLabel("Arama özelliği aktif değil..")
@@ -404,7 +461,6 @@ class MainWindow(QMainWindow):
 
     def show_list_screen(self, title, items, is_song, is_artist, is_setting):
         layout = QVBoxLayout()
-
         label = QLabel(title)
         label.setFont(QFont("Arial", 16))
         label.setAlignment(Qt.AlignCenter)
@@ -414,18 +470,19 @@ class MainWindow(QMainWindow):
 
         if is_song:
             # list_widget.itemClicked.connect(self.on_song_clicked)
-            for track_id in items:
-                track = api.get_track(track_id)
-                track_title = track["title"]
-                track_duration = track["duration"]
-                track_genre = track["genre"]
-                track_artists = ""
+            if not items["error"]:
+                for track_id in items:
+                    track = api.get_track(track_id)
+                    track_title = track["title"]
+                    track_duration = track["duration"]
+                    track_genre = track["genre"]
+                    track_artists = ""
 
-                for artist_id in track["artists_id"]:
-                    track_artists += api.get_artist(artist_id)['name'] + ", "
-                length = len(track_artists)
-                track_artists = track_artists[:length - 2]
-                list_widget.addItem(track_title)
+                    for artist_id in track["artists_id"]:
+                        track_artists += api.get_artist(artist_id)['name'] + ", "
+                    length = len(track_artists)
+                    track_artists = track_artists[:length - 2]
+                    list_widget.addItem(track_title)
         if is_setting:
             list_widget.itemClicked.connect(self.start_screen)
         if is_artist:
