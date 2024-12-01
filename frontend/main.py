@@ -6,11 +6,14 @@ from datetime import datetime
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QWidget, QListWidget, QStackedWidget,
-    QSplitter, QLineEdit
+    QSplitter, QLineEdit, QMessageBox
 )
 from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtCore import Qt, QSize, QPropertyAnimation
 import os
+
+from django.core.serializers import json
+
 import api
 
 
@@ -365,7 +368,7 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         basedir = (os.path.dirname(os.path.abspath(__file__)))
         playlist_data = api.get_user_playlists(user_id)
-        if playlist_data["error"]:
+        if type(playlist_data) == dict: #
             label = QLabel("Henüz bir playlist oluşturulmamış. Eklemek ister misiniz?")
             layout.addWidget(label)
             create_playlist_button = QPushButton("Yeni Playlist")
@@ -407,7 +410,7 @@ class MainWindow(QMainWindow):
 
     def new_playlist_screen(self):
         playlist_name_input = QLineEdit()
-        playlist_name_input.setPlaceholderText("Kullanıcı Adı")
+        playlist_name_input.setPlaceholderText("Playlist Adı")
         playlist_name_input.setFixedWidth(200)
         playlist_name_input.setStyleSheet("""
                     padding: 10px;
@@ -422,28 +425,29 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         layout.addWidget(playlist_name_input, alignment=Qt.AlignHCenter)
         layout.addWidget(label)
-        layout.addStretch()
         add_playlist_button = QPushButton("Playlist'i Oluştur")
-
+        layout.addWidget(add_playlist_button)
+        layout.addStretch()
         home_button = QPushButton("Ana Sayfa")
         home_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.start_screen))
         layout.addWidget(home_button)
         container.setLayout(layout)
         self.stack.addWidget(container)
         self.stack.setCurrentWidget(container)
-
-        playlist_data = [
-            {
-                "playlist_id": 0,
-                "name": playlist_name_input.text(),
-                "created_at": datetime.now().strftime("%Y-%m-%d"),
-                "tracks": [],
-                "user": self._user_id
-            }
-        ]
-
-        add_playlist_button.clicked.connect(api.create_user_playlist(self._user_id, playlist_data))
-
+        add_playlist_button.clicked.connect(lambda: self.create_playlist(playlist_name_input))
+    def create_playlist(self, playlist_name_input):
+        if not playlist_name_input.text():
+            QMessageBox.warning(self, "Uyarı", "Lütfen bir playlist adı girin!")
+            return
+        playlist_data = {
+            "playlist_id": 0,
+            "name": playlist_name_input.text(),
+            "created_at": "2023-05-03",
+            "tracks": [68, 96, 60, 47, 55],
+            "user": self._user_id
+        }
+        result = api.create_user_playlist(self._user_id, playlist_data)
+        print(f"API Response: {result}")
 
     def create_search_screen(self):
         layout = QVBoxLayout()
