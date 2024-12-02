@@ -318,16 +318,12 @@ class MainWindow(QMainWindow):
             button = QPushButton(category_name)
             button.setIcon(QIcon(os.path.join(basedir, "resources", "musician-svgrepo-com.svg")))
             button.setStyleSheet("text-align: left; width: 100%;")
-            button.clicked.connect(lambda _, s=setting_list: self.show_list_screen(category_name, s, False, True,
-                                                                                   False))  # setting verince hata
+            button.clicked.connect(lambda _, s=setting_list: self.show_list_screen(category_name, s, False, False,True))
             layout.addWidget(button)
-
         layout.addStretch()
-
         home_button = QPushButton("Ana Sayfa")
         home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
-
         container = QWidget()
         container.setLayout(layout)
         return container
@@ -523,14 +519,14 @@ class MainWindow(QMainWindow):
                     list_widget.addItem(track_title)
             else:
                 layout.addWidget(QLabel("Playlist'iniz boş."))
-        if is_setting:
-            list_widget.itemClicked.connect(self.start_screen_func(self._user_id))
         if is_artist:
             if type(items) != dict:
                 for album in items:
                     list_widget.addItem(album["title"] + " / " + album["release_date"])
             else:
-                layout.addWidget(QLabel("Sanatçının Albümü bulunmamakta."))
+                layout.addWidget(QLabel("Sanatçının albümü bulunmamakta."))
+        if is_setting:
+            layout.addWidget(QLabel("Uygulamanız güncel."))
         else: # takipci - takip edilen
             if items:
                 for person_id in items:
