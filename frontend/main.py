@@ -6,9 +6,9 @@ from datetime import datetime
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QWidget, QListWidget, QStackedWidget,
-    QSplitter, QLineEdit, QMessageBox
+    QSplitter, QLineEdit, QMessageBox, QScrollArea
 )
-from PyQt5.QtGui import QFont, QIcon, QPixmap, QStandardItemModel, QStandardItem
+from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtCore import Qt, QSize, QPropertyAnimation
 import os
 
@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
         menu_layout = QVBoxLayout()
         self.profile_button = QPushButton("Ana Sayfa")
         self.playlist_button = QPushButton("Playlist'lerim")
-        self.artist_button = QPushButton("Sanatçılarım")
+        self.artist_button = QPushButton("Sanatçılar")
         self.search_button = QPushButton("Arama")
         self.settings_button = QPushButton("Ayarlar")
 
@@ -205,11 +205,9 @@ class MainWindow(QMainWindow):
 
         self.playlist_screen = self.create_playlists_screen(user_id)
 
-        artists_data = {
-            # tamamı
-        }
+        self.artists_data = api.get_artists()
 
-        self.artist_screen = self.create_artist_screen(artists_data)
+        self.artist_screen = self.create_artist_screen(self.artists_data)
         self.search_screen = self.create_search_screen()
         self.settings_screen = self.create_settings_screen()
 
@@ -231,7 +229,7 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-        self.profile_button.clicked.connect(lambda: self.create_after_login(self._user_id))
+        self.profile_button.clicked.connect(lambda: self.start_screen_func(self._user_id))
         self.playlist_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.playlist_screen))
         self.artist_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.artist_screen))
         self.search_button.clicked.connect(lambda: self.stack.setCurrentWidget(self.search_screen))
@@ -342,12 +340,14 @@ class MainWindow(QMainWindow):
     def show_recent_screen(self):
         layout = QVBoxLayout()
 
-        recently = api.get_recently_listened(self._user_id)
-        print(recently)
-        layout.addStretch()
+        new_screen_label = QLabel("Yakın zamanda dinlenenler burada görünecek.")
+        new_screen_label.setAlignment(Qt.AlignCenter)
+        new_screen_label.setFont(QFont("Arial", 18))
+
         home_button = QPushButton("Ana Sayfa")
         home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
 
+        layout.addWidget(new_screen_label)
         layout.addWidget(home_button)
 
         continue_container = QWidget()
@@ -357,16 +357,25 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(continue_container)
 
     def create_artist_screen(self, artist_data):
+        artist_buttons = []
+        search_bar = QLineEdit()
+        search_bar.setPlaceholderText("Sanatçı Ara...")
+        search_bar.textChanged.connect(lambda query: self.search(search_query=query, artist_buttons=artist_buttons))
+
         layout = QVBoxLayout()
+        layout.addWidget(search_bar)
         basedir = (os.path.dirname(os.path.abspath(__file__)))
 
-        for artist, songs in artist_data.items():
-            button = QPushButton(artist)
+        for artist in artist_data:
+            albums = api.get_artist_albums(artist["artist_id"])
+            artist_name = artist["name"]
+            button = QPushButton(artist_name)
             button.setIcon(QIcon(os.path.join(basedir, "resources", "musician-svgrepo-com.svg")))
             button.setStyleSheet("text-align: left; width: 100%;")
 
-            button.clicked.connect(lambda _, a=artist, s=songs: self.show_list_screen(a, s, False, True, False))
+            button.clicked.connect(lambda _, a=artist_name, s=albums: self.show_list_screen(a, s, False, True, False))
             layout.addWidget(button)
+            artist_buttons.append((button, artist_name))
 
         layout.addStretch()
 
@@ -376,7 +385,18 @@ class MainWindow(QMainWindow):
 
         container = QWidget()
         container.setLayout(layout)
-        return container
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(container)
+        return scroll_area
+
+    def search(self, search_query, artist_buttons):
+        search_query = search_query.strip().lower()
+        for button, artist_name in artist_buttons:
+            if search_query in artist_name.lower():
+                button.show()
+            else:
+                button.hide()
 
     def create_playlists_screen(self, user_id):
         layout = QVBoxLayout()
@@ -397,6 +417,7 @@ class MainWindow(QMainWindow):
             container = QWidget()
             container.setLayout(layout)
             return container
+
         for playlist in playlist_data:
             playlist_name = playlist["name"]
             playlist_created_at = playlist["created_at"]
@@ -410,18 +431,10 @@ class MainWindow(QMainWindow):
                 lambda _, a=playlist_name, s=playlist_tracks: self.show_list_screen(a, s, True, False, False))
 
             layout.addWidget(button)
-
-        #layout.addWidget(model)
         layout.addStretch()
-        pl_s_buttons = QHBoxLayout()
         create_playlist_button = QPushButton("Yeni Playlist")
         create_playlist_button.clicked.connect(self.new_playlist_screen)
-        delete_playlist_button = QPushButton("Seçilen Playlist'i Sil")
-        delete_playlist_button.clicked.connect(self.new_playlist_screen)
-        pl_s_buttons.addWidget(create_playlist_button)
-        pl_s_buttons.addWidget(delete_playlist_button)
-        layout.addLayout(pl_s_buttons)
-
+        layout.addWidget(create_playlist_button)
         home_button = QPushButton("Ana Sayfa")
         home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
@@ -460,10 +473,6 @@ class MainWindow(QMainWindow):
             self.create_playlist(playlist_name_input),
             self.create_after_login(self._user_id)
         ))
-
-
-
-
 
     def create_playlist(self, playlist_name_input):
         if not playlist_name_input.text():
@@ -519,13 +528,34 @@ class MainWindow(QMainWindow):
         if is_setting:
             list_widget.itemClicked.connect(self.start_screen_func(self._user_id))
         if is_artist:
-            list_widget.itemClicked.connect(self.on_person_clicked)  # todo change
+            if type(items) != dict:
+                for album in items:
+                    list_widget.addItem(album["title"] + " / " + album["release_date"])
+            else:
+                layout.addWidget(QLabel("Sanatçının Albümü bulunmamakta."))
+            #list_widget.itemClicked.connect(self.on_person_clicked)  # todo change
+        else:
+            list_widget.itemClicked.connect(self.on_person_clicked)
 
         home_button = QPushButton("Ana Sayfa")
         home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
         layout.addWidget(home_button)
 
         container = QWidget()
+        container.setLayout(layout)
+        self.stack.addWidget(container)
+        self.stack.setCurrentWidget(container)
+
+    def on_song_clicked(self, item):
+        text = item.text()
+        container = QWidget()
+        label = QLabel(f"'{text}' için şarkılar burada görünecek.")
+        layout = QVBoxLayout()
+        layout.addWidget(label)
+        layout.addStretch()
+        home_button = QPushButton("Ana Sayfa")
+        home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
+        layout.addWidget(home_button)
         container.setLayout(layout)
         self.stack.addWidget(container)
         self.stack.setCurrentWidget(container)
@@ -543,6 +573,9 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.stack.addWidget(container)
         self.stack.setCurrentWidget(container)
+
+
+# todo
 
 if __name__ == "__main__":
     app = QApplication([])
