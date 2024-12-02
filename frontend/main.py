@@ -338,23 +338,40 @@ class MainWindow(QMainWindow):
         return container
 
     def show_recent_screen(self):
+
+        # print(api.get_recently_listened(self._user_id))
+        # [{'recently_listened_id': 1, 'timestamp': '2023-10-22', 'play_count': 155, 'user': 1, 'track': 59},
         layout = QVBoxLayout()
+        list_widget = QListWidget()
+        items = api.get_recently_listened(self._user_id)
+        if items:
+            for recently_listened_item in items:
+                track = api.get_track(recently_listened_item["track"])
+                timestamp = recently_listened_item["timestamp"]
+                play_count = recently_listened_item["play_count"]
+                track_title = track["title"]
+                track_duration = track["duration"]
+                track_genre = track["genre"]
+                track_artists = ""
 
-        new_screen_label = QLabel("Yakın zamanda dinlenenler burada görünecek.")
-        new_screen_label.setAlignment(Qt.AlignCenter)
-        new_screen_label.setFont(QFont("Arial", 18))
+                for artist_id in track["artists_id"]:
+                    track_artists += api.get_artist(artist_id)['name'] + ", "
+                length = len(track_artists)
+                track_artists = track_artists[:length - 2]
+                list_widget.addItem(
+                    f"{track_title} - {track_genre} - {track_artists} - {play_count} - {timestamp}"
+                )
+        else:
+            layout.addWidget(QLabel("Playlist'iniz boş."))
 
+        layout.addWidget(list_widget)
         home_button = QPushButton("Ana Sayfa")
         home_button.clicked.connect(lambda: self.create_after_login(self._user_id))
-
-        layout.addWidget(new_screen_label)
         layout.addWidget(home_button)
-
-        continue_container = QWidget()
-        continue_container.setLayout(layout)
-
-        self.stack.addWidget(continue_container)
-        self.stack.setCurrentWidget(continue_container)
+        container = QWidget()
+        container.setLayout(layout)
+        self.stack.addWidget(container)
+        self.stack.setCurrentWidget(container)
 
     def create_artist_screen(self, artist_data):
         artist_buttons = []
