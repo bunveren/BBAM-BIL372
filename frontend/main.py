@@ -540,7 +540,8 @@ class MainWindow(QMainWindow):
                     person_followed_by = api.get_followed_by(person_id)
                     button = QPushButton(person_name)
                     button.setStyleSheet("text-align: left; width: 100%;")
-                    button.clicked.connect(lambda: self.on_person_clicked(person_id, person_details))
+                    button.clicked.connect(
+                        lambda _, pid=person_id, details=person_details: self.on_person_clicked(pid, details))
                     layout.addWidget(button)
 
             else:
@@ -561,8 +562,8 @@ class MainWindow(QMainWindow):
         person_following = api.get_following(person_id)
         person_followed_by = api.get_followed_by(person_id)
         basedir = (os.path.dirname(os.path.abspath(__file__)))
-        followers_num = len(person_following)
-        followed_by_num = len(person_followed_by)
+        followers_num = len(person_followed_by)
+        followed_by_num = len(person_following)
         followers_button = QPushButton(f"Takipçiler ({followers_num})")
         following_button = QPushButton(f"Takip Edilenler ({followed_by_num})")
         followers_button.setIcon(QIcon(os.path.join(basedir, "resources", "follower-svgrepo-com.svg")))
